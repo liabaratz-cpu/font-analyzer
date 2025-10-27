@@ -1,1 +1,79 @@
 
+{
+  "name": "font-exposure-analyzer",
+  "version": "1.0.0",
+  "description": "Font Exposure Analyzer Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "puppeteer": "^21.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+
+4. **גללי למטה ולחצי "Commit new file"**
+
+### קובץ 2: `server.js`
+
+1. **שוב: "Add file" > "Create new file"**
+2. **שם הקובץ:** `server.js`
+3. **העתיקי את הקוד מהקובץ "server.js - השרת המלא" שיצרתי לך למעלה** (זה ארוך - כל הקוד)
+4. **לחצי "Commit new file"**
+
+---
+
+## שלב 3️⃣: חיבור ל-Render
+
+1. **היכנסי ל-[Render Dashboard](https://dashboard.render.com)**
+2. **לחצי "New +" (כפתור כחול למעלה)**
+3. **בחרי "Web Service"**
+4. **לחצי "Connect a repository"**
+5. **תראי את הרשימה של Repositories שלך - בחרי `font-analyzer`**
+
+---
+
+## שלב 4️⃣: הגדרות הפריסה
+
+מלאי את השדות האלה:
+```
+Name: font-analyzer
+Region: בחרי הכי קרוב (Frankfurt/Amsterdam)
+Branch: main
+Runtime: Node
+Build Command: npm install
+Start Command: npm start
+Instance Type: Free
+```
+
+**לחצי "Create Web Service"** (כפתור כחול למטה)
+
+---
+
+## שלב 5️⃣: המתני לפריסה
+
+Render יתחיל לבנות את השרת. תראי בלוגים:
+```
+==> Cloning from GitHub...
+==> Installing dependencies...
+==> Building...
+==> Starting server...
+🚀 Server running on port 10000
+==> Your service is live at https://font-analyzer-xxxx.onrender.com
+```
+
+**זה לוקח 3-5 דקות** ⏳
+
+---
+
+## שלב 6️⃣: העתיקי את ה-URL
+
+כשזה מוכן, תראי בראש הדף URL כמו:
+```
+https://font-analyzer-xyz123.onrender.com
