@@ -1,4 +1,3 @@
-
 {
   "name": "font-exposure-analyzer",
   "version": "1.0.0",
@@ -13,3 +12,7 @@
     "puppeteer-core": "^22.0.0",
     "@sparticuz/chromium": "^121.0.0"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
