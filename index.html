@@ -377,7 +377,8 @@
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="color: #666; font-size: 1.1em;">סורק את הדף... אנא המתן</p>
+                <p style="color: #666; font-size: 1.1em;" id="loadingText">סורק את הדף... אנא המתן</p>
+                <p style="color: #999; font-size: 0.9em; margin-top: 10px;">⏱️ הסריקה הראשונה לוקחת 15-20 שניות (השרת מתעורר)</p>
             </div>
 
             <div class="results" id="results">
@@ -472,13 +473,20 @@
             showLoading();
 
             try {
+                // Create abort controller for timeout
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 90000); // 90 seconds timeout
+
                 const response = await fetch(`${API_URL}/api/analyze`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify({ url }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeout);
 
                 if (!response.ok) {
                     throw new Error(`שגיאת שרת: ${response.status}`);
@@ -496,7 +504,11 @@
 
             } catch (error) {
                 hideLoading();
-                showError(`שגיאה בסריקת הדף: ${error.message}`);
+                if (error.name === 'AbortError') {
+                    showError('הסריקה ארכה יותר מדי. נסה שוב - לפעמים השרת לוקח זמן להתעורר.');
+                } else {
+                    showError(`שגיאה בסריקת הדף: ${error.message}`);
+                }
             }
         }
 
