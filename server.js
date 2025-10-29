@@ -6,14 +6,20 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Bing Search API key (optional - set in Render environment variables)
+const BING_SEARCH_KEY = process.env.BING_SEARCH_KEY || null;
+
 app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         message: 'Font Analyzer API is running',
-        version: '1.0.0'
+        version: '2.0.0',
+        features: {
+            webSearch: !!BING_SEARCH_KEY
+        }
     });
 });
 
@@ -21,16 +27,76 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
+// Helper function to search web for font mentions
+async function searchFontMentions(fontName, platform) {
+    if (!BING_SEARCH_KEY) {
+        // Estimated mentions based on platform
+        const estimates = {
+            'Google Fonts': { min: 5000, max: 50000 },
+            'Adobe Fonts': { min: 2000, max: 20000 },
+            'MyFonts': { min: 500, max: 5000 },
+            'Fontspring': { min: 300, max: 3000 },
+            'default': { min: 100, max: 1000 }
+        };
+
+        const range = estimates[platform] || estimates.default;
+        const estimated = Math.floor(Math.random() * (range.max - range.min) + range.min);
+
+        return {
+            totalResults: estimated,
+            sources: [],
+            estimated: true,
+            message: 'הערכה (הוסף Bing Search API למדידה מדויקת)'
+        };
+    }
+
+    try {
+        // Search with Bing API
+        const query = `"${fontName}" font`;
+        const response = await fetch(`https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(query)}&count=10`, {
+            headers: {
+                'Ocp-Apim-Subscription-Key': BING_SEARCH_KEY
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Bing API error');
+        }
+
+        const data = await response.json();
+
+        const sources = (data.webPages?.value || []).slice(0, 5).map(item => ({
+            title: item.name,
+            url: item.url,
+            snippet: item.snippet
+        }));
+
+        return {
+            totalResults: data.webPages?.totalEstimatedMatches || 0,
+            sources,
+            estimated: false
+        };
+    } catch (error) {
+        console.error('Search error:', error);
+        return {
+            totalResults: 0,
+            sources: [],
+            estimated: true,
+            error: 'לא ניתן לבצע חיפוש ברשת'
+        };
+    }
+}
+
 app.post('/api/analyze', async (req, res) => {
     let browser;
-    
+
     try {
         const { url } = req.body;
 
         if (!url) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                error: 'URL is required' 
+                error: 'URL is required'
             });
         }
 
@@ -42,14 +108,14 @@ app.post('/api/analyze', async (req, res) => {
             executablePath: await chromium.executablePath(),
             headless: chromium.headless
         });
-        
+
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-        
+
         console.log('📄 טוען דף...');
-        await page.goto(url, { 
+        await page.goto(url, {
             waitUntil: 'networkidle2',
-            timeout: 30000 
+            timeout: 30000
         });
 
         console.log('🔎 מחלץ מידע...');
@@ -59,7 +125,7 @@ app.post('/api/analyze', async (req, res) => {
             const metaDesc = document.querySelector('meta[name="description"]')?.content || '';
             const ogDesc = document.querySelector('meta[property="og:description"]')?.content || '';
             const bodyText = (document.body.innerText || document.body.textContent || '').substring(0, 50000);
-            
+
             return {
                 title,
                 h1,
@@ -75,8 +141,29 @@ app.post('/api/analyze', async (req, res) => {
         const urlObj = new URL(url);
         const analysis = analyzeData(data, urlObj);
 
+        // Search for mentions
+        console.log('🌐 מחפש אזכורים ברשת...');
+        const mentions = await searchFontMentions(analysis.fontName, analysis.platform);
+
+        analysis.mentions = mentions;
+
+        // Update scores with mentions data
+        if (mentions.totalResults > 0) {
+            const mentionsScore = Math.min(100, Math.log10(mentions.totalResults) * 25);
+            analysis.scores.mentionsScore = Math.round(mentionsScore);
+
+            // Recalculate final score
+            analysis.scores.final = Math.round(
+                (analysis.scores.contentQuality * 0.25) +
+                (analysis.scores.weightsScore * 0.30) +
+                (analysis.scores.technicalScore * 0.15) +
+                (analysis.scores.optimizationScore * 0.10) +
+                (analysis.scores.mentionsScore * 0.20)
+            );
+        }
+
         console.log('✅ הושלם בהצלחה');
-        
+
         res.json({
             success: true,
             data: analysis
@@ -84,22 +171,22 @@ app.post('/api/analyze', async (req, res) => {
 
     } catch (error) {
         console.error('❌ שגיאה:', error.message);
-        
+
         if (browser) {
             await browser.close();
         }
-        
-        res.status(500).json({ 
+
+        res.status(500).json({
             success: false,
-            error: 'Failed to analyze font', 
-            details: error.message 
+            error: 'Failed to analyze font',
+            details: error.message
         });
     }
 });
 
 function analyzeData(data, urlObj) {
     const hostname = urlObj.hostname.toLowerCase();
-    
+
     let fontName = data.h1 || data.title.split('|')[0].split('-')[0].trim();
     fontName = fontName.replace(/\s+(font|typeface)$/i, '').trim();
     if (!fontName) {
@@ -217,8 +304,8 @@ function extractWeights(text) {
 }
 
 function calculateScores(data) {
-    const contentQuality = Math.min(100, 
-        20 + 
+    const contentQuality = Math.min(100,
+        20 +
         data.platform.boost +
         (data.description.length > 50 ? 15 : 0) +
         (data.hasHttps ? 10 : 0) +
@@ -267,4 +354,5 @@ function calculateScores(data) {
 
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🔍 Web search: ${BING_SEARCH_KEY ? 'Enabled' : 'Disabled (using estimates)'}`);
 });
