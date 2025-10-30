@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>כלי בדיקת חשיפת פונט | Font Exposure Analyzer</title>
+    <title>Font Exposure Analyzer | Find Your Perfect Font Exposure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,44 +15,56 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #fafafa;
             min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 0;
+            margin: 0;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             width: 100%;
+            margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 80px 40px 60px;
             text-align: center;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-family: 'PT Serif', serif;
+            font-size: 42px;
+            margin-bottom: 16px;
             font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
+            font-size: 20px;
+            color: #666;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .accent {
+            color: #0693e3;
+            font-weight: 700;
+            font-style: italic;
         }
 
         .content {
-            padding: 40px;
+            padding: 60px 40px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .input-section {
@@ -71,37 +86,39 @@
 
         .input-group input {
             flex: 1;
-            padding: 15px 20px;
+            padding: 16px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
             direction: ltr;
             text-align: left;
+            background: #fff;
         }
 
         .input-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #0693e3;
+            box-shadow: 0 0 0 3px rgba(6, 147, 227, 0.1);
         }
 
         .btn {
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 32px;
+            background: #32373c;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: #1a1d21;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:disabled {
@@ -167,30 +184,31 @@
         }
 
         .score-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 40px;
-            border-radius: 15px;
+            padding: 48px;
+            border-radius: 12px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
         }
 
         .score-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
+            top: -20px;
+            right: -20px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(249, 197, 84, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.8; }
         }
 
         .score-label {
@@ -224,10 +242,17 @@
         }
 
         .detail-card {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            border-right: 4px solid #667eea;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .detail-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
         .detail-label {
@@ -244,10 +269,11 @@
         }
 
         .info-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: #fafafa;
+            padding: 32px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 1px solid #e8e8e8;
         }
 
         .info-title {
@@ -291,18 +317,18 @@
         }
 
         .badge-success {
-            background: #d4edda;
-            color: #155724;
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #fff3e0;
+            color: #e65100;
         }
 
         .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #e3f2fd;
+            color: #1565c0;
         }
 
         .weights-list {
@@ -313,10 +339,10 @@
         }
 
         .weight-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #0693e3;
+            color: #ffffff;
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 6px;
             font-size: 0.9em;
             font-weight: 600;
         }
@@ -350,78 +376,58 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 כלי בדיקת חשיפת פונט</h1>
-            <p>גלה את רמת החשיפה של הפונט שלך ברשת</p>
+            <h1>Find the <span class="accent">Perfect Exposure</span> for Your Font</h1>
+            <p>Analyze fonts with AI and discover their web performance metrics</p>
         </div>
 
         <div class="content">
             <div class="input-section">
-                <label for="fontUrl">הדבק כאן את כתובת URL של דף הפונט:</label>
+                <label for="fontUrl">Enter font page URL or just font name:</label>
                 <div class="input-group">
                     <input
-                        type="url"
+                        type="text"
                         id="fontUrl"
-                        placeholder="https://fonts.google.com/specimen/Roboto"
-                        dir="ltr"
+                        placeholder="https://fonts.google.com/specimen/Roboto or just 'Roboto'"
                     >
                     <button class="btn" onclick="analyzeFontPage()">
-                        🚀 סרוק דף
+                        Analyze Font
                     </button>
                 </div>
-            </div>
-
-            <div style="text-align: center; margin: 20px 0; color: #666;">
-                <strong>או</strong>
-            </div>
-
-            <div class="input-section">
-                <label for="fontFile">העלה קובץ פונט לסריקה טכנית מדויקת:</label>
-                <div class="input-group">
-                    <input
-                        type="file"
-                        id="fontFile"
-                        accept=".ttf,.otf,.woff,.woff2"
-                        style="flex: 1; padding: 10px; border: 2px dashed #667eea; border-radius: 10px; background: #f8f9fa;"
-                    >
-                    <button class="btn" onclick="analyzeFontFile()">
-                        📁 נתח קובץ
-                    </button>
-                </div>
-                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                    ✓ תומך ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
+                <p style="font-size: 0.85em; color: #999; margin-top: 8px;">
+                    💡 Enter a URL for full analysis, or just a font name to search social media mentions
                 </p>
             </div>
 
             <div class="error" id="error">
-                <div class="error-title">❌ שגיאה</div>
+                <div class="error-title">❌ Error</div>
                 <div class="error-message" id="errorMessage"></div>
             </div>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="color: #666; font-size: 1.1em;" id="loadingText">סורק את הדף... אנא המתן</p>
-                <p style="color: #999; font-size: 0.9em; margin-top: 10px;">⏱️ הסריקה הראשונה לוקחת 15-20 שניות (השרת מתעורר)</p>
+                <p style="color: #666; font-size: 1.1em;" id="loadingText">Analyzing page... Please wait</p>
+                <p style="color: #999; font-size: 0.9em; margin-top: 10px;">⏱️ First scan takes 15-20 seconds (server waking up)</p>
             </div>
 
             <div class="results" id="results">
                 <div class="score-card">
-                    <div class="score-label">ציון חשיפה כולל</div>
+                    <div class="score-label">ציון Exposure כולל</div>
                     <div class="score-value" id="finalScore">0</div>
-                    <div class="score-description" id="scoreDescription">טוען...</div>
+                    <div class="score-description" id="scoreDescription">Loading...</div>
                 </div>
 
                 <div class="info-section">
                     <div class="info-title">📊 פרטי הפונט</div>
                     <div class="info-row">
-                        <span class="info-key">שם הפונט:</span>
+                        <span class="info-key">Font Name:</span>
                         <span class="info-value" id="fontName">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-key">פלטפורמה:</span>
+                        <span class="info-key">Platform:</span>
                         <span class="info-value" id="platform">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-key">דומיין:</span>
+                        <span class="info-key">Domain:</span>
                         <span class="info-value" id="domain" style="direction: ltr; text-align: left;">-</span>
                     </div>
                     <div class="info-row">
@@ -431,12 +437,12 @@
                 </div>
 
                 <div class="info-section">
-                    <div class="info-title">⚖️ משקלים וגרסאות</div>
+                    <div class="info-title">⚖️ Weights וגרסאות</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
                     </div>
                     <div class="info-row">
-                        <span class="info-key">מספר משקלים שזוהו:</span>
+                        <span class="info-key">מספר Weights שזוהו:</span>
                         <span class="info-value" id="weightsCount">-</span>
                     </div>
                     <div class="info-row">
@@ -447,7 +453,7 @@
                 </div>
 
                 <div class="info-section">
-                    <div class="info-title">✨ תכונות טכניות</div>
+                    <div class="info-title">✨ Technical Features</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
                     </div>
@@ -455,7 +461,7 @@
                 </div>
 
                 <div class="info-section" id="mentionsSection" style="display: none;">
-                    <div class="info-title">🌐 אזכורים ברשת</div>
+                    <div class="info-title">🌐 Web Mentions</div>
                     <div class="info-row">
                         <span class="info-key">סה"כ אזכורים באינטרנט:</span>
                         <span class="info-value" id="mentionsCount" style="font-size: 1.3em; font-weight: 700; color: #667eea;">-</span>
@@ -466,15 +472,15 @@
 
                 <div class="details-grid">
                     <div class="detail-card">
-                        <div class="detail-label">איכות תוכן</div>
+                        <div class="detail-label">איכות תוYes</div>
                         <div class="detail-value" id="contentQuality">0</div>
                     </div>
                     <div class="detail-card">
-                        <div class="detail-label">ציון משקלים</div>
+                        <div class="detail-label">ציון Weights</div>
                         <div class="detail-value" id="weightsScore">0</div>
                     </div>
                     <div class="detail-card">
-                        <div class="detail-label">תכונות טכניות</div>
+                        <div class="detail-label">Technical Features</div>
                         <div class="detail-value" id="technicalScore">0</div>
                     </div>
                     <div class="detail-card">
@@ -489,24 +495,24 @@
 
                 <!-- Score Explanation -->
                 <div class="info-section" id="scoreExplanation" style="display: none; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-                    <div class="info-title">📊 הסבר על הציון</div>
+                    <div class="info-title">📊 Score Explanation</div>
                     <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
-                        <p style="margin-bottom: 15px;"><strong>הציון הכולל מורכב מ-5 מרכיבים:</strong></p>
+                        <p style="margin-bottom: 15px;"><strong>The overall score is composed of 5 components:</strong></p>
                         <ul style="list-style: none; padding: 0;">
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>איכות תוכן (25%):</strong> פלטפורמה, תיאור, HTTPS, אורך תוכן
+                                <strong>איכות תוYes (25%):</strong> Platform, תיאור, HTTPS, אורך תוYes
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>משקלים (30%):</strong> מספר משקלים, Italic, מגוון רחב
+                                <strong>Weights (30%):</strong> מספר Weights, Italic, מגוון רחב
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>תכונות טכניות (15%):</strong> OpenType, Variable Font, ליגטורות, עברית
+                                <strong>Technical Features (15%):</strong> OpenType, Variable Font, ליגטורות, Hebrew
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>אופטימיזציה (10%):</strong> HTTPS, תיאור טוב, פלטפורמה מוכרת
+                                <strong>אופטימיזציה (10%):</strong> HTTPS, תיאור טוב, Platform מוכרת
                             </li>
                             <li style="padding: 8px 0;">
-                                <strong>אזכורים ברשת (20%):</strong> מספר תוצאות בגוגל, נוכחות ברשת
+                                <strong>Web Mentions (20%):</strong> מספר תוצאות בגוגל, נוכחות ברשת
                             </li>
                         </ul>
                     </div>
@@ -514,14 +520,36 @@
 
                 <!-- Improvement Tips -->
                 <div class="info-section" id="improvementTips" style="display: none; background: #fff9e6; border-right: 4px solid #ffd700;">
-                    <div class="info-title">💡 עצות לשיפור הציון</div>
+                    <div class="info-title">💡 Tips to Improve Score</div>
                     <div id="tipsContent" style="font-size: 0.95em; line-height: 1.6; color: #333;"></div>
+                </div>
+
+                <!-- Upload section - appears after URL analysis -->
+                <div class="info-section" id="uploadSection" style="display: none; background: #f0f9ff; border: 2px dashed #3b82f6; border-radius: 12px;">
+                    <div class="info-title">📊 Want more accurate technical details?</div>
+                    <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                        Upload the original font file to get accurate analysis of technical features (OpenType, Ligatures, language support, and more)
+                    </p>
+                    <div class="input-group">
+                        <input
+                            type="file"
+                            id="fontFile"
+                            accept=".ttf,.otf,.woff,.woff2"
+                            style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: #fff;"
+                        >
+                        <button class="btn" onclick="analyzeFontFile()">
+                            🔬 Analyze File
+                        </button>
+                    </div>
+                    <p style="font-size: 0.85em; color: #999; margin-top: 12px;">
+                        ✓ Supported ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
+                    </p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>🚀 Font Exposure Analyzer | נבנה עבור מעצבי פונטים</p>
+            <p>🚀 Font Exposure Analyzer | Built for Font Designers</p>
         </div>
     </div>
 
@@ -532,12 +560,7 @@
             const url = document.getElementById('fontUrl').value.trim();
 
             if (!url) {
-                showError('נא להזין כתובת URL');
-                return;
-            }
-
-            if (!isValidUrl(url)) {
-                showError('נא להזין כתובת URL תקינה');
+                showError('Please enter a URL or font name');
                 return;
             }
 
@@ -546,32 +569,63 @@
             showLoading();
 
             try {
-                // Create abort controller for timeout
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 90000); // 90 seconds timeout
+                // Check if it's a URL or just a font name
+                const isUrl = isValidUrl(url);
 
-                const response = await fetch(`${API_URL}/api/analyze`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url }),
-                    signal: controller.signal
-                });
+                if (isUrl) {
+                    // Full URL analysis
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 90000);
 
-                clearTimeout(timeout);
+                    const response = await fetch(`${API_URL}/api/analyze`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ url }),
+                        signal: controller.signal
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`שגיאת שרת: ${response.status}`);
+                    clearTimeout(timeout);
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Unknown error');
+                    }
+
+                    currentUrlData = result.data;
+                    displayResults(result.data);
+                } else {
+                    // Just font name - search mentions only
+                    document.getElementById('loadingText').textContent = 'Searching social media mentions...';
+
+                    const response = await fetch(`${API_URL}/api/search-font`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ fontName: url })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Unknown error');
+                    }
+
+                    // Display only mentions (no technical data)
+                    displayMentionsOnly(result.data);
                 }
 
-                const result = await response.json();
-
-                if (!result.success) {
-                    throw new Error(result.error || 'שגיאה לא ידועה');
-                }
-
-                displayResults(result.data);
                 hideLoading();
                 showResults();
 
@@ -580,61 +634,92 @@
                 if (error.name === 'AbortError') {
                     showError('הסריקה ארכה יותר מדי. נסה שוב - לפעמים השרת לוקח זמן להתעורר.');
                 } else {
-                    showError(`שגיאה בסריקת הדף: ${error.message}`);
+                    showError(`Error בסריקת הדף: ${error.message}`);
                 }
             }
         }
 
+        function displayMentionsOnly(data) {
+            // Hide all sections except mentions
+            document.getElementById('scoreCard').style.display = 'none';
+            document.getElementById('fontInfoSection').style.display = 'none';
+            document.getElementById('weightsSection').style.display = 'none';
+            document.getElementById('featuresSection').style.display = 'none';
+            document.getElementById('scoresSection').style.display = 'none';
+            document.getElementById('scoreExplanation').style.display = 'none';
+            document.getElementById('improvementTips').style.display = 'none';
+
+            // Show only font name and mentions
+            document.getElementById('results').innerHTML = `
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="font-size: 2.5em; color: #1a1a1a; margin-bottom: 10px;">${data.fontName}</h2>
+                    <p style="color: #666;">Social Media Mentions</p>
+                </div>
+            `;
+
+            // Display mentions
+            if (data.mentions && data.mentions.sources && data.mentions.sources.length > 0) {
+                const mentionsHtml = `
+                    <div class="info-section">
+                        <div class="info-title">📊 Found ${data.mentions.totalResults.toLocaleString()} mentions</div>
+                        <div style="margin-top: 20px;">
+                            <h4 style="margin-bottom: 15px; color: #333;">Top Sources (including social media):</h4>
+                            ${data.mentions.sources.map(source => `
+                                <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    ${source.platform ? `<span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-bottom: 8px; display: inline-block;">${source.platform}</span>` : ''}
+                                    <a href="${source.url}" target="_blank" style="color: #0693e3; font-weight: 600; text-decoration: none; display: block; margin-top: 8px;">
+                                        ${source.title}
+                                    </a>
+                                    <p style="color: #666; font-size: 0.9em; margin-top: 8px; line-height: 1.5;">${source.snippet}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Upload section for technical details -->
+                    <div class="info-section" id="uploadSection" style="background: #f0f9ff; border: 2px dashed #0693e3; border-radius: 12px; margin-top: 30px;">
+                        <div class="info-title">📊 Want technical details?</div>
+                        <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                            Upload the font file to get accurate technical analysis (OpenType features, Ligatures, language support, and more)
+                        </p>
+                        <div class="input-group">
+                            <input
+                                type="file"
+                                id="fontFile"
+                                accept=".ttf,.otf,.woff,.woff2"
+                                style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: #fff;"
+                            >
+                            <button class="btn" onclick="analyzeFontFile()">
+                                Analyze File
+                            </button>
+                        </div>
+                        <p style="font-size: 0.85em; color: #999; margin-top: 12px;">
+                            ✓ Supports: TTF, OTF, WOFF, WOFF2 | Max 10MB
+                        </p>
+                    </div>
+                `;
+                document.getElementById('results').innerHTML += mentionsHtml;
+            } else {
+                document.getElementById('results').innerHTML += `
+                    <div class="info-section" style="text-align: center; padding: 40px;">
+                        <p style="color: #666; font-size: 1.1em;">No social media mentions found for "${data.fontName}"</p>
+                        <p style="color: #999; margin-top: 10px;">Try uploading the font file for technical analysis instead</p>
+                    </div>
+                `;
+            }
+        }
+
         function displayResults(data) {
-            // Final Score
+            // Hide all technical sections - will only show after file upload
+            document.getElementById('fontInfoSection').style.display = 'none';
+            document.getElementById('weightsSection').style.display = 'none';
+            document.getElementById('featuresSection').style.display = 'none';
+            document.getElementById('scoresSection').style.display = 'none';
+
+            // Show only score card
             const finalScore = data.scores.final;
             document.getElementById('finalScore').textContent = finalScore;
             document.getElementById('scoreDescription').textContent = getScoreDescription(finalScore);
-
-            // Font Info
-            document.getElementById('fontName').textContent = data.fontName || 'לא זוהה';
-            document.getElementById('platform').textContent = data.platform || 'לא זוהה';
-            document.getElementById('domain').textContent = data.domain || 'לא זוהה';
-            document.getElementById('https').innerHTML = data.hasHttps
-                ? '<span class="badge badge-success">✓ מאובטח</span>'
-                : '<span class="badge badge-warning">✗ לא מאובטח</span>';
-
-            // Weights
-            document.getElementById('weightsCount').textContent = data.weights.count || 0;
-            document.getElementById('hasItalic').innerHTML = data.weights.hasItalic
-                ? '<span class="badge badge-success">✓ כן</span>'
-                : '<span class="badge badge-warning">✗ לא</span>';
-
-            // Weights List
-            const weightsList = document.getElementById('weightsList');
-            if (data.weights.detected && data.weights.detected.length > 0) {
-                weightsList.innerHTML = '<div class="weights-list">' +
-                    data.weights.detected.map(w =>
-                        `<div class="weight-badge">${getWeightName(w)}</div>`
-                    ).join('') +
-                    '</div>';
-            } else {
-                weightsList.innerHTML = '<p style="color: #666;">לא זוהו משקלים ספציפיים</p>';
-            }
-
-            // Features
-            const featuresList = document.getElementById('featuresList');
-            const features = data.features;
-            featuresList.innerHTML = Object.entries(features)
-                .map(([key, value]) => `
-                    <div class="info-row">
-                        <span class="info-key">${getFeatureName(key)}:</span>
-                        <span class="info-value">
-                            ${value ? '<span class="badge badge-success">✓ תומך</span>' : '<span class="badge badge-warning">✗ לא תומך</span>'}
-                        </span>
-                    </div>
-                `).join('');
-
-            // Detailed Scores
-            document.getElementById('contentQuality').textContent = data.scores.contentQuality;
-            document.getElementById('weightsScore').textContent = data.scores.weightsScore;
-            document.getElementById('technicalScore').textContent = data.scores.technicalScore;
-            document.getElementById('optimizationScore').textContent = data.scores.optimizationScore;
 
             // Mentions
             if (data.mentions) {
@@ -645,19 +730,20 @@
                 // Status message
                 const mentionsStatus = document.getElementById('mentionsStatus');
                 if (data.mentions.estimated) {
-                    mentionsStatus.textContent = data.mentions.message || 'הערכה (ללא Bing Search API)';
+                    mentionsStatus.textContent = data.mentions.message || 'הערכה (לNo Bing Search API)';
                     mentionsStatus.style.color = '#ff9800';
                 } else {
-                    mentionsStatus.textContent = '✓ נתונים אמיתיים מ-Bing Search';
+                    mentionsStatus.textContent = '✓ Real data from Google Search';
                     mentionsStatus.style.color = '#4caf50';
                 }
 
                 // Sources
                 const mentionsSources = document.getElementById('mentionsSources');
                 if (data.mentions.sources && data.mentions.sources.length > 0) {
-                    mentionsSources.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;">מקורות מובילים:</h4>' +
+                    mentionsSources.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;">Top Sources (including social media):</h4>' +
                         data.mentions.sources.map(source => `
-                            <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #667eea;">
+                            <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid ${source.platform ? '#4267B2' : '#667eea'};">
+                                ${source.platform ? `<span style="background: #e8f0fe; color: #1967d2; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-left: 8px;">${source.platform}</span>` : ''}
                                 <a href="${source.url}" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
                                     ${source.title}
                                 </a>
@@ -665,7 +751,7 @@
                             </div>
                         `).join('');
                 } else if (!data.mentions.estimated) {
-                    mentionsSources.innerHTML = '<p style="color: #999;">לא נמצאו מקורות ספציפיים</p>';
+                    mentionsSources.innerHTML = '<p style="color: #999;">No נמצאו מקורות ספציפיים</p>';
                 }
 
                 // Mentions Score
@@ -687,14 +773,19 @@
                     '</ul>';
                 document.getElementById('improvementTips').style.display = 'block';
             }
+
+            // Show file upload section only after URL analysis (not after file upload)
+            if (data.source !== 'file') {
+                document.getElementById('uploadSection').style.display = 'block';
+            }
         }
 
         function getScoreDescription(score) {
-            if (score >= 90) return 'מעולה! חשיפה גבוהה מאוד';
-            if (score >= 75) return 'טוב מאוד! חשיפה גבוהה';
-            if (score >= 60) return 'בסדר - יש מקום לשיפור';
-            if (score >= 40) return 'נמוכה - מומלץ לשפר';
-            return 'נמוכה מאוד - דורש שיפור משמעותי';
+            if (score >= 90) return 'מעולה! Exposure גבוהה מאוד';
+            if (score >= 75) return 'טוב מאוד! Exposure גבוהה';
+            if (score >= 60) return 'Good - room for improvement';
+            if (score >= 40) return 'Low - recommended to improve';
+            return 'Very low - requires significant improvement';
         }
 
         function getWeightName(weight) {
@@ -714,15 +805,69 @@
 
         function getFeatureName(key) {
             const names = {
-                'hebrew': 'עברית',
+                'hebrew': 'Hebrew',
                 'opentype': 'OpenType',
                 'webfont': 'Web Font',
                 'variable': 'Variable Font',
                 'ligatures': 'Ligatures',
                 'alternates': 'Alternates',
-                'latin': 'לטינית'
+                'latin': 'Latin'
             };
             return names[key] || key;
+        }
+
+        // Function to populate technical details after file upload
+        function displayTechnicalDetails(data) {
+            // Font Info
+            document.getElementById('fontName').textContent = data.fontName || 'Not detected';
+            document.getElementById('platform').textContent = data.platform || 'Not detected';
+            document.getElementById('domain').textContent = data.domain || 'Not detected';
+            document.getElementById('https').innerHTML = data.hasHttps
+                ? '<span class="badge badge-success">✓ Secure</span>'
+                : '<span class="badge badge-warning">✗ Not Secure</span>';
+
+            // Weights
+            document.getElementById('weightsCount').textContent = data.weights.count || 0;
+            document.getElementById('hasItalic').innerHTML = data.weights.hasItalic
+                ? '<span class="badge badge-success">✓ Yes</span>'
+                : '<span class="badge badge-warning">✗ No</span>';
+
+            // Weights List
+            const weightsList = document.getElementById('weightsList');
+            if (data.weights.detected && data.weights.detected.length > 0) {
+                weightsList.innerHTML = '<div class="weights-list">' +
+                    data.weights.detected.map(w =>
+                        `<div class="weight-badge">${getWeightName(w)}</div>`
+                    ).join('') +
+                    '</div>';
+            } else {
+                weightsList.innerHTML = '<p style="color: #666;">No specific weights detected</p>';
+            }
+
+            // Features
+            const featuresList = document.getElementById('featuresList');
+            const features = data.features;
+            featuresList.innerHTML = Object.entries(features)
+                .map(([key, value]) => `
+                    <div class="info-row">
+                        <span class="info-key">${getFeatureName(key)}:</span>
+                        <span class="info-value">
+                            ${value ? '<span class="badge badge-success">✓ Supported</span>' : '<span class="badge badge-warning">✗ Not Supported</span>'}
+                        </span>
+                    </div>
+                `).join('');
+
+            // Detailed Scores
+            document.getElementById('contentQuality').textContent = data.scores.contentQuality;
+            document.getElementById('weightsScore').textContent = data.scores.weightsScore;
+            document.getElementById('technicalScore').textContent = data.scores.technicalScore;
+            document.getElementById('optimizationScore').textContent = data.scores.optimizationScore;
+
+            // Show all technical sections
+            document.getElementById('fontInfoSection').style.display = 'block';
+            document.getElementById('weightsSection').style.display = 'block';
+            document.getElementById('featuresSection').style.display = 'block';
+            document.getElementById('scoresSection').style.display = 'block';
         }
 
         function isValidUrl(string) {
@@ -767,19 +912,21 @@
         });
 
         // New function for file upload analysis
+        // Store the current URL analysis data
+        let currentUrlData = null;
+
         async function analyzeFontFile() {
             const fileInput = document.getElementById('fontFile');
             const file = fileInput.files[0];
 
             if (!file) {
-                showError('נא לבחור קובץ פונט');
+                showError('Please select a font file');
                 return;
             }
 
             hideError();
-            hideResults();
             showLoading();
-            document.getElementById('loadingText').textContent = 'מנתח קובץ פונט...';
+            document.getElementById('loadingText').textContent = 'Analyzing font file for technical details...';
 
             try {
                 const formData = new FormData();
@@ -791,22 +938,46 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`שגיאת שרת: ${response.status}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
 
                 const result = await response.json();
 
                 if (!result.success) {
-                    throw new Error(result.error || 'שגיאה לא ידועה');
+                    throw new Error(result.error || 'Error No ידועה');
                 }
 
-                displayResults(result.data);
+                // Merge file data with current URL data
+                if (currentUrlData) {
+                    // Keep weights and mentions from URL, update only features from file
+                    const mergedData = {
+                        ...currentUrlData,
+                        features: result.data.features,
+                        technicalDataSource: 'file'
+                    };
+
+                    // Recalculate technical score based on file features
+                    mergedData.scores.technicalScore = result.data.scores.technicalScore;
+
+                    // Now display the technical details
+                    displayTechnicalDetails(mergedData);
+
+                    // Show success message
+                    const uploadSection = document.getElementById('uploadSection');
+                    uploadSection.style.background = '#ecfdf5';
+                    uploadSection.style.borderColor = '#10b981';
+                    uploadSection.innerHTML = '<div class="info-title">✅ Technical details updated from file!</div><p style="color: #059669; font-weight: 600;">Technical features (OpenType, Ligatures, language support) updated based on your uploaded file</p>';
+                } else {
+                    // For standalone file analysis (no URL data)
+                    displayResults(result.data);
+                    displayTechnicalDetails(result.data);
+                }
+
                 hideLoading();
-                showResults();
 
             } catch (error) {
                 hideLoading();
-                showError(`שגיאה בניתוח הקובץ: ${error.message}`);
+                showError(`Error בניתוח הקובץ: ${error.message}`);
             }
         }
 
@@ -816,30 +987,30 @@
             const scores = data.scores;
 
             if (scores.weightsScore < 70) {
-                tips.push('📏 <strong>הוסף משקלים נוספים:</strong> פונט עם 5+ משקלים מקבל ציון גבוה יותר. שקול להוסיף Light, Regular, Medium, Bold, Black.');
+                tips.push('📏 <strong>הוסף Weights נוספים:</strong> פונט עם 5+ Weights מקבל ציון גבוה יותר. שקול להוסיף Light, Regular, Medium, Bold, Black.');
             }
 
             if (scores.technicalScore < 70) {
                 if (!data.features.variable) {
-                    tips.push('🔧 <strong>Variable Font:</strong> המר את הפונט ל-Variable Font לתמיכה בטווח משקלים רציף.');
+                    tips.push('🔧 <strong>Variable Font:</strong> המר את הפונט ל-Variable Font לתמיכה בטווח Weights רציף.');
                 }
                 if (!data.features.ligatures) {
                     tips.push('✨ <strong>הוסף Ligatures:</strong> ליגטורות משפרות את מראה הפונט ומעלות את הציון הטכני.');
                 }
                 if (!data.features.hebrew) {
-                    tips.push('🔤 <strong>תמיכה בעברית:</strong> הוספת תווים עבריים תרחיב את קהל היעד.');
+                    tips.push('🔤 <strong>תמיכה בHebrew:</strong> הוספת תווים עבריים תרחיב את קהל היעד.');
                 }
             }
 
             if (scores.contentQuality < 70) {
                 tips.push('📝 <strong>שפר את התיאור:</strong> הוסף תיאור מפורט בדף הפונט (לפחות 50 תווים).');
-                if (data.platform === 'אתר עצמאי') {
-                    tips.push('🌐 <strong>העלה לפלטפורמה מוכרת:</strong> Google Fonts או Adobe Fonts יעניקו ציון גבוה יותר.');
+                if (data.platform === 'Independent Site') {
+                    tips.push('🌐 <strong>העלה לPlatform מוכרת:</strong> Google Fonts או Adobe Fonts יעניקו ציון גבוה יותר.');
                 }
             }
 
             if (data.mentions && data.mentions.totalResults < 1000) {
-                tips.push('📢 <strong>הגבר חשיפה:</strong> שתף את הפונט ברשתות חברתיות, בלוגים ופורומים של עיצוב.');
+                tips.push('📢 <strong>הגבר Exposure:</strong> שתף את הפונט ברשתות חברתיות, בלוגים ופורומים של עיצוב.');
             }
 
             if (scores.final >= 90) {
