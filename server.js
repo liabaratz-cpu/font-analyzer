@@ -2,24 +2,78 @@ const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
+const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// SerpAPI key
+const SERPAPI_KEY = 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58ccff5b';
 
 app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         message: 'Font Analyzer API is running',
-        version: '1.0.0'
+        version: '2.1.0',
+        features: {
+            webSearch: !!SERPAPI_KEY
+        }
     });
 });
 
 app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
+
+// Helper function to search web for font mentions
+async function searchFontMentions(fontName, platform) {
+    if (!SERPAPI_KEY) {
+        return {
+            totalResults: 0,
+            sources: [],
+            estimated: true,
+            message: 'No API key configured'
+        };
+    }
+
+    try {
+        const query = `"${fontName}" font`;
+        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=10&api_key=${SERPAPI_KEY}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error('SerpAPI error');
+        }
+
+        const data = await response.json();
+
+        const sources = (data.organic_results || []).slice(0, 5).map(item => ({
+            title: item.title,
+            url: item.link,
+            snippet: item.snippet || ''
+        }));
+
+        const totalResults = data.search_information?.total_results || 0;
+
+        return {
+            totalResults: totalResults,
+            sources,
+            estimated: false
+        };
+    } catch (error) {
+        console.error('Search error:', error);
+        return {
+            totalResults: 0,
+            sources: [],
+            estimated: true,
+            error: 'Failed to search'
+        };
+    }
+}
 
 app.post('/api/analyze', async (req, res) => {
     let browser;
@@ -75,8 +129,28 @@ app.post('/api/analyze', async (req, res) => {
         const urlObj = new URL(url);
         const analysis = analyzeData(data, urlObj);
 
+        // Search for mentions
+        console.log('🌐 מחפש אזכורים ברשת...');
+        const mentions = await searchFontMentions(analysis.fontName, analysis.platform);
+        analysis.mentions = mentions;
+
+        // Update scores with mentions data if available
+        if (mentions.totalResults > 0 && !mentions.estimated) {
+            const mentionsScore = Math.min(100, Math.log10(mentions.totalResults) * 25);
+            analysis.scores.mentionsScore = Math.round(mentionsScore);
+
+            // Recalculate final score
+            analysis.scores.final = Math.round(
+                (analysis.scores.contentQuality * 0.25) +
+                (analysis.scores.weightsScore * 0.30) +
+                (analysis.scores.technicalScore * 0.15) +
+                (analysis.scores.optimizationScore * 0.10) +
+                (analysis.scores.mentionsScore * 0.20)
+            );
+        }
+
         console.log('✅ הושלם בהצלחה');
-        
+
         res.json({
             success: true,
             data: analysis
