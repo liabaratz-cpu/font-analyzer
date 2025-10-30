@@ -65,43 +65,27 @@ async function searchFontMentions(fontName, platform) {
 
         const data = await response.json();
 
-        // Very strict filtering - must be actually about the font
-        const strictKeywords = [
-            'typeface', 'font family', 'typography', 'specimen', 'weights', 'designed by',
-            'type foundry', 'font design', 'glyphs', 'characters', 'opentype', 'variable font',
-            'google fonts', 'adobe fonts', 'myfonts', 'fonts.com', 'type designer',
-            // Hebrew keywords
-            'פונט', 'טיפוגרפיה', 'משקלים', 'עיצוב פונט', 'תווים', 'אותיות', 'ליה פונטים', 'liafonts'
+        // Light filtering - just exclude obvious non-font results
+        const excludeKeywords = [
+            'font awesome', 'icon', 'download free', 'crack', 'torrent', 'הורדה חינם',
+            // Exclude wedding veil results if font name is in Hebrew
+            ...(isHebrew ? ['רעלת', 'שמלת כלה', 'חתונה', 'כלות', 'טקס חופה'] : [])
         ];
-
-        const excludeKeywords = ['font awesome', 'icon', 'download free', 'crack', 'torrent', 'הורדה חינם'];
 
         const filteredResults = (data.organic_results || []).filter(item => {
             const text = (item.title + ' ' + (item.snippet || '')).toLowerCase();
             const urlLower = item.link.toLowerCase();
 
-            // Exclude unwanted results
-            if (excludeKeywords.some(keyword => text.includes(keyword) || urlLower.includes(keyword))) {
-                return false;
-            }
+            // Only exclude if contains unwanted keywords
+            const hasExcludedKeyword = excludeKeywords.some(keyword =>
+                text.includes(keyword.toLowerCase()) || urlLower.includes(keyword.toLowerCase())
+            );
 
-            // Must contain font name AND at least one strict keyword
-            const hasFontName = text.includes(fontName.toLowerCase());
-            const hasStrictKeyword = strictKeywords.some(keyword => text.includes(keyword.toLowerCase()));
-
-            // Or if it's from a known font platform
-            const isKnownPlatform = urlLower.includes('fonts.google') ||
-                                   urlLower.includes('fonts.adobe') ||
-                                   urlLower.includes('myfonts') ||
-                                   urlLower.includes('typography.com') ||
-                                   urlLower.includes('fontshop') ||
-                                   urlLower.includes('typewolf') ||
-                                   urlLower.includes('liafonts.com');
-
-            return hasFontName && (hasStrictKeyword || isKnownPlatform);
+            // Include result if it doesn't have excluded keywords
+            return !hasExcludedKeyword;
         });
 
-        const sources = filteredResults.slice(0, 5).map(item => ({
+        const sources = filteredResults.slice(0, 8).map(item => ({
             title: item.title,
             url: item.link,
             snippet: item.snippet || ''
@@ -112,24 +96,25 @@ async function searchFontMentions(fontName, platform) {
         // Social media search - also more specific with "פונט" or "font" before name
         let socialQuery;
         if (isHebrew) {
-            socialQuery = `"פונט ${fontName}" OR "${fontName} פונט" (site:instagram.com OR site:behance.net OR site:dribbble.com)`;
+            socialQuery = `"${fontName}" (site:instagram.com OR site:behance.net OR site:dribbble.com OR site:pinterest.com)`;
         } else {
-            socialQuery = `"${fontName} font" OR "${fontName} typeface" (site:instagram.com OR site:behance.net OR site:dribbble.com)`;
+            socialQuery = `"${fontName}" (site:instagram.com OR site:behance.net OR site:dribbble.com OR site:pinterest.com)`;
         }
         let socialSources = [];
 
         try {
-            const socialUrl = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(socialQuery)}&num=10&api_key=${SERPAPI_KEY}`;
+            const socialUrl = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(socialQuery)}&num=15&api_key=${SERPAPI_KEY}`;
             const socialResponse = await fetch(socialUrl);
             if (socialResponse.ok) {
                 const socialData = await socialResponse.json();
-                socialSources = (socialData.organic_results || []).slice(0, 3).map(item => ({
+                socialSources = (socialData.organic_results || []).slice(0, 5).map(item => ({
                     title: item.title,
                     url: item.link,
                     snippet: item.snippet || '',
                     platform: item.link.includes('instagram') ? 'Instagram' :
                              item.link.includes('behance') ? 'Behance' :
-                             item.link.includes('dribbble') ? 'Dribbble' : 'Social'
+                             item.link.includes('dribbble') ? 'Dribbble' :
+                             item.link.includes('pinterest') ? 'Pinterest' : 'Social'
                 }));
             }
         } catch (socialError) {
@@ -138,7 +123,7 @@ async function searchFontMentions(fontName, platform) {
 
         return {
             totalResults: totalResults,
-            sources: [...sources, ...socialSources].slice(0, 8),
+            sources: [...sources, ...socialSources].slice(0, 12),
             estimated: false
         };
     } catch (error) {
