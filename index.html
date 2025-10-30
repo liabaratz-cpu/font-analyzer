@@ -416,7 +416,7 @@
                     <div class="score-description" id="scoreDescription">Loading...</div>
                 </div>
 
-                <div class="info-section">
+                <div class="info-section" id="fontInfoSection" style="display: none;">
                     <div class="info-title">📊 פרטי הפונט</div>
                     <div class="info-row">
                         <span class="info-key">Font Name:</span>
@@ -436,7 +436,7 @@
                     </div>
                 </div>
 
-                <div class="info-section">
+                <div class="info-section" id="weightsSection" style="display: none;">
                     <div class="info-title">⚖️ Weights וגרסאות</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
@@ -452,7 +452,7 @@
                     <div id="weightsList" style="margin-top: 15px;"></div>
                 </div>
 
-                <div class="info-section">
+                <div class="info-section" id="featuresSection" style="display: none;">
                     <div class="info-title">✨ Technical Features</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
@@ -470,7 +470,7 @@
                     <div id="mentionsSources" style="margin-top: 15px;"></div>
                 </div>
 
-                <div class="details-grid">
+                <div class="details-grid" id="scoresSection" style="display: none;">
                     <div class="detail-card">
                         <div class="detail-label">איכות תוYes</div>
                         <div class="detail-value" id="contentQuality">0</div>
@@ -710,11 +710,8 @@
         }
 
         function displayResults(data) {
-            // Hide all technical sections - will only show after file upload
-            document.getElementById('fontInfoSection').style.display = 'none';
-            document.getElementById('weightsSection').style.display = 'none';
-            document.getElementById('featuresSection').style.display = 'none';
-            document.getElementById('scoresSection').style.display = 'none';
+            // Store data for later use with file upload
+            window.currentAnalysisData = data;
 
             // Show only score card
             const finalScore = data.scores.final;
