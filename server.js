@@ -196,18 +196,21 @@ function analyzeData(data, urlObj) {
 
     const platform = identifyPlatform(hostname);
 
-    const hasHebrew = /[\u0590-\u05FF]/.test(data.bodyText) || /hebrew|עברית/i.test(data.bodyText);
+    // Combine bodyText and description for better detection
+    const fullText = data.bodyText + ' ' + data.description;
+
+    const hasHebrew = /[\u0590-\u05FF]/.test(fullText) || /hebrew|עברית/i.test(fullText);
     const features = {
         hebrew: hasHebrew,
-        opentype: /opentype|otf|אופן טייפ/i.test(data.bodyText),
-        webfont: /webfont|woff|פונט אינטרנט|פונט ווב/i.test(data.bodyText),
-        variable: /variable.?font|וריאבל|פונט משתנה/i.test(data.bodyText),
-        ligatures: /ligatur|ליגטור|ליגטורות/i.test(data.bodyText),
-        alternates: /alternate|stylistic|אלטרנטיב|חלופ/i.test(data.bodyText),
+        opentype: /opentype|otf|אופן טייפ/i.test(fullText),
+        webfont: /webfont|woff|פונט אינטרנט|פונט ווב/i.test(fullText),
+        variable: /variable.?font|וריאבל|פונט משתנה/i.test(fullText),
+        ligatures: /ligatur|ליגטור|ליגטורות/i.test(fullText),
+        alternates: /alternate|stylistic|אלטרנטיב|חלופ/i.test(fullText),
         latin: true
     };
 
-    const weights = extractWeights(data.bodyText);
+    const weights = extractWeights(fullText);
 
     const scores = calculateScores({
         platform,
