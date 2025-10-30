@@ -377,17 +377,20 @@
 
         <div class="content">
             <div class="input-section">
-                <label for="fontUrl">Enter font page URL:</label>
+                <label for="fontUrl">Enter font page URL or just font name:</label>
                 <div class="input-group">
                     <input
-                        type="url"
+                        type="text"
                         id="fontUrl"
-                        placeholder="https://fonts.google.com/specimen/Roboto"
+                        placeholder="https://fonts.google.com/specimen/Roboto or just 'Roboto'"
                     >
                     <button class="btn" onclick="analyzeFontPage()">
                         Analyze Font
                     </button>
                 </div>
+                <p style="font-size: 0.85em; color: #999; margin-top: 8px;">
+                    💡 Enter a URL for full analysis, or just a font name to search social media mentions
+                </p>
             </div>
 
             <div class="error" id="error">
@@ -552,12 +555,7 @@
             const url = document.getElementById('fontUrl').value.trim();
 
             if (!url) {
-                showError('נא להזין כתובת URL');
-                return;
-            }
-
-            if (!isValidUrl(url)) {
-                showError('נא להזין כתובת URL תקינה');
+                showError('Please enter a URL or font name');
                 return;
             }
 
@@ -566,35 +564,63 @@
             showLoading();
 
             try {
-                // Create abort controller for timeout
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 90000); // 90 seconds timeout
+                // Check if it's a URL or just a font name
+                const isUrl = isValidUrl(url);
 
-                const response = await fetch(`${API_URL}/api/analyze`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url }),
-                    signal: controller.signal
-                });
+                if (isUrl) {
+                    // Full URL analysis
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 90000);
 
-                clearTimeout(timeout);
+                    const response = await fetch(`${API_URL}/api/analyze`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ url }),
+                        signal: controller.signal
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
+                    clearTimeout(timeout);
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Unknown error');
+                    }
+
+                    currentUrlData = result.data;
+                    displayResults(result.data);
+                } else {
+                    // Just font name - search mentions only
+                    document.getElementById('loadingText').textContent = 'Searching social media mentions...';
+
+                    const response = await fetch(`${API_URL}/api/search-font`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ fontName: url })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Unknown error');
+                    }
+
+                    // Display only mentions (no technical data)
+                    displayMentionsOnly(result.data);
                 }
 
-                const result = await response.json();
-
-                if (!result.success) {
-                    throw new Error(result.error || 'Error No ידועה');
-                }
-
-                // Store the URL data for later file upload merge
-                currentUrlData = result.data;
-
-                displayResults(result.data);
                 hideLoading();
                 showResults();
 
@@ -605,6 +631,76 @@
                 } else {
                     showError(`Error בסריקת הדף: ${error.message}`);
                 }
+            }
+        }
+
+        function displayMentionsOnly(data) {
+            // Hide all sections except mentions
+            document.getElementById('scoreCard').style.display = 'none';
+            document.getElementById('fontInfoSection').style.display = 'none';
+            document.getElementById('weightsSection').style.display = 'none';
+            document.getElementById('featuresSection').style.display = 'none';
+            document.getElementById('scoresSection').style.display = 'none';
+            document.getElementById('scoreExplanation').style.display = 'none';
+            document.getElementById('improvementTips').style.display = 'none';
+
+            // Show only font name and mentions
+            document.getElementById('results').innerHTML = `
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="font-size: 2.5em; color: #1a1a1a; margin-bottom: 10px;">${data.fontName}</h2>
+                    <p style="color: #666;">Social Media Mentions</p>
+                </div>
+            `;
+
+            // Display mentions
+            if (data.mentions && data.mentions.sources && data.mentions.sources.length > 0) {
+                const mentionsHtml = `
+                    <div class="info-section">
+                        <div class="info-title">📊 Found ${data.mentions.totalResults.toLocaleString()} mentions</div>
+                        <div style="margin-top: 20px;">
+                            <h4 style="margin-bottom: 15px; color: #333;">Top Sources (including social media):</h4>
+                            ${data.mentions.sources.map(source => `
+                                <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    ${source.platform ? `<span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-bottom: 8px; display: inline-block;">${source.platform}</span>` : ''}
+                                    <a href="${source.url}" target="_blank" style="color: #0693e3; font-weight: 600; text-decoration: none; display: block; margin-top: 8px;">
+                                        ${source.title}
+                                    </a>
+                                    <p style="color: #666; font-size: 0.9em; margin-top: 8px; line-height: 1.5;">${source.snippet}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Upload section for technical details -->
+                    <div class="info-section" id="uploadSection" style="background: #f0f9ff; border: 2px dashed #0693e3; border-radius: 12px; margin-top: 30px;">
+                        <div class="info-title">📊 Want technical details?</div>
+                        <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                            Upload the font file to get accurate technical analysis (OpenType features, Ligatures, language support, and more)
+                        </p>
+                        <div class="input-group">
+                            <input
+                                type="file"
+                                id="fontFile"
+                                accept=".ttf,.otf,.woff,.woff2"
+                                style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: #fff;"
+                            >
+                            <button class="btn" onclick="analyzeFontFile()">
+                                Analyze File
+                            </button>
+                        </div>
+                        <p style="font-size: 0.85em; color: #999; margin-top: 12px;">
+                            ✓ Supports: TTF, OTF, WOFF, WOFF2 | Max 10MB
+                        </p>
+                    </div>
+                `;
+                document.getElementById('results').innerHTML += mentionsHtml;
+            } else {
+                document.getElementById('results').innerHTML += `
+                    <div class="info-section" style="text-align: center; padding: 40px;">
+                        <p style="color: #666; font-size: 1.1em;">No social media mentions found for "${data.fontName}"</p>
+                        <p style="color: #999; margin-top: 10px;">Try uploading the font file for technical analysis instead</p>
+                    </div>
+                `;
             }
         }
 
