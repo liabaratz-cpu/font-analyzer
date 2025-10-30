@@ -426,6 +426,16 @@
                     <div id="featuresList"></div>
                 </div>
 
+                <div class="info-section" id="mentionsSection" style="display: none;">
+                    <div class="info-title">🌐 אזכורים ברשת</div>
+                    <div class="info-row">
+                        <span class="info-key">סה"כ אזכורים באינטרנט:</span>
+                        <span class="info-value" id="mentionsCount" style="font-size: 1.3em; font-weight: 700; color: #667eea;">-</span>
+                    </div>
+                    <div id="mentionsStatus" style="margin-top: 10px; color: #999; font-size: 0.9em;"></div>
+                    <div id="mentionsSources" style="margin-top: 15px;"></div>
+                </div>
+
                 <div class="details-grid">
                     <div class="detail-card">
                         <div class="detail-label">איכות תוכן</div>
@@ -442,6 +452,10 @@
                     <div class="detail-card">
                         <div class="detail-label">אופטימיזציה</div>
                         <div class="detail-value" id="optimizationScore">0</div>
+                    </div>
+                    <div class="detail-card" id="mentionsScoreCard" style="display: none;">
+                        <div class="detail-label">ציון אזכורים</div>
+                        <div class="detail-value" id="mentionsScoreValue">0</div>
                     </div>
                 </div>
             </div>
@@ -562,6 +576,45 @@
             document.getElementById('weightsScore').textContent = data.scores.weightsScore;
             document.getElementById('technicalScore').textContent = data.scores.technicalScore;
             document.getElementById('optimizationScore').textContent = data.scores.optimizationScore;
+
+            // Mentions
+            if (data.mentions) {
+                document.getElementById('mentionsSection').style.display = 'block';
+                document.getElementById('mentionsCount').textContent =
+                    data.mentions.totalResults.toLocaleString('he-IL');
+
+                // Status message
+                const mentionsStatus = document.getElementById('mentionsStatus');
+                if (data.mentions.estimated) {
+                    mentionsStatus.textContent = data.mentions.message || 'הערכה (ללא Bing Search API)';
+                    mentionsStatus.style.color = '#ff9800';
+                } else {
+                    mentionsStatus.textContent = '✓ נתונים אמיתיים מ-Bing Search';
+                    mentionsStatus.style.color = '#4caf50';
+                }
+
+                // Sources
+                const mentionsSources = document.getElementById('mentionsSources');
+                if (data.mentions.sources && data.mentions.sources.length > 0) {
+                    mentionsSources.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;">מקורות מובילים:</h4>' +
+                        data.mentions.sources.map(source => `
+                            <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid #667eea;">
+                                <a href="${source.url}" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                                    ${source.title}
+                                </a>
+                                <p style="color: #666; font-size: 0.9em; margin-top: 5px;">${source.snippet}</p>
+                            </div>
+                        `).join('');
+                } else if (!data.mentions.estimated) {
+                    mentionsSources.innerHTML = '<p style="color: #999;">לא נמצאו מקורות ספציפיים</p>';
+                }
+
+                // Mentions Score
+                if (data.scores.mentionsScore !== undefined) {
+                    document.getElementById('mentionsScoreCard').style.display = 'block';
+                    document.getElementById('mentionsScoreValue').textContent = data.scores.mentionsScore;
+                }
+            }
         }
 
         function getScoreDescription(score) {
