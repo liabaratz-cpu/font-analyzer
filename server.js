@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // SerpAPI key (set in Render environment variables)
-const SERPAPI_KEY = process.env.SERPAPI_KEY || null;
+const SERPAPI_KEY = process.env.SERPAPI_KEY || 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58ccff5b';
 
 app.use(cors());
 app.use(express.json());
