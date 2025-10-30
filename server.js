@@ -202,7 +202,7 @@ function analyzeData(data, urlObj) {
         opentype: /opentype|otf|אופן טייפ/i.test(data.bodyText),
         webfont: /webfont|woff|פונט אינטרנט|פונט ווב/i.test(data.bodyText),
         variable: /variable.?font|וריאבל|פונט משתנה/i.test(data.bodyText),
-        ligatures: /ligatur|ליגטור/i.test(data.bodyText),
+        ligatures: /ligatur|ליגטור|ליגטורות/i.test(data.bodyText),
         alternates: /alternate|stylistic|אלטרנטיב|חלופ/i.test(data.bodyText),
         latin: true
     };
