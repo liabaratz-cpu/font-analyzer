@@ -43,8 +43,18 @@ async function searchFontMentions(fontName, platform) {
     }
 
     try {
+        // Detect if font name is in Hebrew
+        const isHebrew = /[\u0590-\u05FF]/.test(fontName);
+
         // Very specific search query - must include font-specific terms
-        const query = `"${fontName}" (typeface OR "font family" OR typography) -"font awesome" -download -free`;
+        let query;
+        if (isHebrew) {
+            // Hebrew font search
+            query = `"${fontName}" (פונט OR טיפוגרפיה OR "עיצוב פונט") -הורדה -חינם`;
+        } else {
+            // English font search
+            query = `"${fontName}" (typeface OR "font family" OR typography) -"font awesome" -download -free`;
+        }
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=30&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
@@ -59,10 +69,12 @@ async function searchFontMentions(fontName, platform) {
         const strictKeywords = [
             'typeface', 'font family', 'typography', 'specimen', 'weights', 'designed by',
             'type foundry', 'font design', 'glyphs', 'characters', 'opentype', 'variable font',
-            'google fonts', 'adobe fonts', 'myfonts', 'fonts.com', 'type designer'
+            'google fonts', 'adobe fonts', 'myfonts', 'fonts.com', 'type designer',
+            // Hebrew keywords
+            'פונט', 'טיפוגרפיה', 'משקלים', 'עיצוב פונט', 'תווים', 'אותיות', 'ליה פונטים', 'liafonts'
         ];
 
-        const excludeKeywords = ['font awesome', 'icon', 'download free', 'crack', 'torrent'];
+        const excludeKeywords = ['font awesome', 'icon', 'download free', 'crack', 'torrent', 'הורדה חינם'];
 
         const filteredResults = (data.organic_results || []).filter(item => {
             const text = (item.title + ' ' + (item.snippet || '')).toLowerCase();
@@ -83,7 +95,8 @@ async function searchFontMentions(fontName, platform) {
                                    urlLower.includes('myfonts') ||
                                    urlLower.includes('typography.com') ||
                                    urlLower.includes('fontshop') ||
-                                   urlLower.includes('typewolf');
+                                   urlLower.includes('typewolf') ||
+                                   urlLower.includes('liafonts.com');
 
             return hasFontName && (hasStrictKeyword || isKnownPlatform);
         });
@@ -394,12 +407,20 @@ app.post('/api/analyze-file', upload.single('fontFile'), async (req, res) => {
 
 function analyzeData(data, urlObj) {
     const hostname = urlObj.hostname.toLowerCase();
-    
+
     let fontName = data.h1 || data.title.split('|')[0].split('-')[0].trim();
-    fontName = fontName.replace(/\s+(font|typeface)$/i, '').trim();
-    if (!fontName) {
+
+    // Clean up font name - remove common prefixes/suffixes in Hebrew and English
+    fontName = fontName
+        .replace(/^(פונט|font|typeface)\s+/i, '') // Remove prefix
+        .replace(/\s+(פונט|font|typeface)$/i, '') // Remove suffix
+        .replace(/\s*[-–—]\s*.*/,'') // Remove everything after dash
+        .trim();
+
+    if (!fontName || fontName.length < 2) {
         const pathParts = urlObj.pathname.split('/').filter(p => p);
         fontName = pathParts[pathParts.length - 1] || 'Unknown Font';
+        fontName = fontName.charAt(0).toUpperCase() + fontName.slice(1); // Capitalize
     }
 
     const platform = identifyPlatform(hostname);
