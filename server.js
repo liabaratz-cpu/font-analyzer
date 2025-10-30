@@ -6,8 +6,8 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Bing Search API key (optional - set in Render environment variables)
-const BING_SEARCH_KEY = process.env.BING_SEARCH_KEY || null;
+// SerpAPI key (set in Render environment variables)
+const SERPAPI_KEY = process.env.SERPAPI_KEY || null;
 
 app.use(cors());
 app.use(express.json());
@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
         message: 'Font Analyzer API is running',
         version: '2.0.0',
         features: {
-            webSearch: !!BING_SEARCH_KEY
+            webSearch: !!SERPAPI_KEY
         }
     });
 });
@@ -29,7 +29,7 @@ app.get('/health', (req, res) => {
 
 // Helper function to search web for font mentions
 async function searchFontMentions(fontName, platform) {
-    if (!BING_SEARCH_KEY) {
+    if (!SERPAPI_KEY) {
         // Estimated mentions based on platform
         const estimates = {
             'Google Fonts': { min: 5000, max: 50000 },
@@ -66,33 +66,35 @@ async function searchFontMentions(fontName, platform) {
             totalResults: estimated,
             sources: manualSources,
             estimated: true,
-            message: 'הערכה (הוסף Bing Search API למדידה מדויקת)'
+            message: 'הערכה (הוסף SerpAPI למדידה מדויקת)'
         };
     }
 
     try {
-        // Search with Bing API
+        // Search with SerpAPI (Google Search)
         const query = `"${fontName}" font`;
-        const response = await fetch(`https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(query)}&count=10`, {
-            headers: {
-                'Ocp-Apim-Subscription-Key': BING_SEARCH_KEY
-            }
-        });
+        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=10&api_key=${SERPAPI_KEY}`;
+
+        const response = await fetch(url);
 
         if (!response.ok) {
-            throw new Error('Bing API error');
+            throw new Error('SerpAPI error');
         }
 
         const data = await response.json();
 
-        const sources = (data.webPages?.value || []).slice(0, 5).map(item => ({
-            title: item.name,
-            url: item.url,
-            snippet: item.snippet
+        // Extract organic results
+        const sources = (data.organic_results || []).slice(0, 5).map(item => ({
+            title: item.title,
+            url: item.link,
+            snippet: item.snippet || ''
         }));
 
+        // Get total results from search information
+        const totalResults = data.search_information?.total_results || 0;
+
         return {
-            totalResults: data.webPages?.totalEstimatedMatches || 0,
+            totalResults: totalResults,
             sources,
             estimated: false
         };
