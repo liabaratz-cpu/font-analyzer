@@ -65,24 +65,45 @@ async function searchFontMentions(fontName, platform) {
 
         const data = await response.json();
 
-        // Light filtering - just exclude obvious non-font results
+        // Balanced filtering - must mention font/typography + exclude irrelevant
+        const fontKeywords = [
+            'typeface', 'font', 'typography', 'פונט', 'טיפוגרפיה', 'אותיות',
+            'עיצוב גרפי', 'גופן', 'type design', 'font family'
+        ];
+
         const excludeKeywords = [
             'font awesome', 'icon', 'download free', 'crack', 'torrent', 'הורדה חינם',
             // Exclude wedding veil results if font name is in Hebrew
-            ...(isHebrew ? ['רעלת', 'שמלת כלה', 'חתונה', 'כלות', 'טקס חופה'] : [])
+            ...(isHebrew ? ['רעלת כלה', 'שמלת כלה', 'חתונה', 'כלות', 'טקס חופה', 'לכלה'] : [])
         ];
 
         const filteredResults = (data.organic_results || []).filter(item => {
             const text = (item.title + ' ' + (item.snippet || '')).toLowerCase();
             const urlLower = item.link.toLowerCase();
 
-            // Only exclude if contains unwanted keywords
+            // Exclude unwanted results first
             const hasExcludedKeyword = excludeKeywords.some(keyword =>
-                text.includes(keyword.toLowerCase()) || urlLower.includes(keyword.toLowerCase())
+                text.includes(keyword.toLowerCase())
             );
+            if (hasExcludedKeyword) return false;
 
-            // Include result if it doesn't have excluded keywords
-            return !hasExcludedKeyword;
+            // Must contain font name
+            const hasFontName = text.includes(fontName.toLowerCase());
+            if (!hasFontName) return false;
+
+            // Must have at least one font-related keyword OR be from known platform
+            const hasFontKeyword = fontKeywords.some(keyword =>
+                text.includes(keyword.toLowerCase())
+            );
+            const isKnownPlatform = urlLower.includes('fonts.google') ||
+                                   urlLower.includes('fonts.adobe') ||
+                                   urlLower.includes('myfonts') ||
+                                   urlLower.includes('liafonts.com') ||
+                                   urlLower.includes('fontimonim') ||
+                                   urlLower.includes('behance') ||
+                                   urlLower.includes('dribbble');
+
+            return hasFontKeyword || isKnownPlatform;
         });
 
         const sources = filteredResults.slice(0, 8).map(item => ({
