@@ -42,9 +42,29 @@ async function searchFontMentions(fontName, platform) {
         const range = estimates[platform] || estimates.default;
         const estimated = Math.floor(Math.random() * (range.max - range.min) + range.min);
 
+        // Provide manual search links when no API key
+        const searchQuery = encodeURIComponent(`"${fontName}" font`);
+        const manualSources = [
+            {
+                title: `חפש "${fontName}" ב-Google`,
+                url: `https://www.google.com/search?q=${searchQuery}`,
+                snippet: 'לחץ לחיפוש ידני ב-Google'
+            },
+            {
+                title: `חפש "${fontName}" ב-Bing`,
+                url: `https://www.bing.com/search?q=${searchQuery}`,
+                snippet: 'לחץ לחיפוש ידני ב-Bing'
+            },
+            {
+                title: `חפש "${fontName}" ב-DuckDuckGo`,
+                url: `https://duckduckgo.com/?q=${searchQuery}`,
+                snippet: 'לחץ לחיפוש ידני ב-DuckDuckGo'
+            }
+        ];
+
         return {
             totalResults: estimated,
-            sources: [],
+            sources: manualSources,
             estimated: true,
             message: 'הערכה (הוסף Bing Search API למדידה מדויקת)'
         };
