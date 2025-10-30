@@ -3,6 +3,9 @@ const cors = require('cors');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 const fetch = require('node-fetch');
+const opentype = require('opentype.js');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -167,6 +170,133 @@ app.post('/api/analyze', async (req, res) => {
             success: false,
             error: 'Failed to analyze font', 
             details: error.message 
+        });
+    }
+});
+
+// New endpoint for font file upload analysis
+app.post('/api/analyze-file', upload.single('fontFile'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No font file uploaded'
+            });
+        }
+
+        console.log('📁 מנתח קובץ פונט:', req.file.originalname);
+
+        const buffer = req.file.buffer;
+        const font = opentype.parse(buffer.buffer);
+
+        // Extract font information
+        const fontName = font.names.fullName?.en || font.names.fontFamily?.en || 'Unknown Font';
+
+        // Get weights (from font instances or default)
+        const weights = [];
+        if (font.tables.fvar && font.tables.fvar.axes) {
+            // Variable font
+            const weightAxis = font.tables.fvar.axes.find(axis => axis.tag === 'wght');
+            if (weightAxis) {
+                // Sample common weights within range
+                const min = weightAxis.minValue;
+                const max = weightAxis.maxValue;
+                [100, 200, 300, 400, 500, 600, 700, 800, 900].forEach(w => {
+                    if (w >= min && w <= max) weights.push(w);
+                });
+            }
+        } else {
+            // Static font - has one weight
+            weights.push(400); // Default to Regular
+        }
+
+        // Check for OpenType features
+        const features = {
+            hebrew: false,
+            opentype: !!(font.tables.gsub || font.tables.gpos),
+            webfont: true, // If we can parse it, it's usable as webfont
+            variable: !!(font.tables.fvar),
+            ligatures: false,
+            alternates: false,
+            latin: false
+        };
+
+        // Check for ligatures
+        if (font.tables.gsub && font.tables.gsub.features) {
+            features.ligatures = font.tables.gsub.features.some(f =>
+                f.tag === 'liga' || f.tag === 'dlig' || f.tag === 'clig'
+            );
+            features.alternates = font.tables.gsub.features.some(f =>
+                f.tag === 'salt' || f.tag === 'ss01' || f.tag === 'ss02'
+            );
+        }
+
+        // Check language support
+        if (font.glyphs) {
+            // Check for Hebrew characters (U+0590 to U+05FF)
+            features.hebrew = Object.keys(font.glyphs.glyphs).some(key => {
+                const glyph = font.glyphs.glyphs[key];
+                return glyph.unicode >= 0x0590 && glyph.unicode <= 0x05FF;
+            });
+
+            // Check for Latin characters
+            features.latin = Object.keys(font.glyphs.glyphs).some(key => {
+                const glyph = font.glyphs.glyphs[key];
+                return glyph.unicode >= 0x0041 && glyph.unicode <= 0x007A;
+            });
+        }
+
+        const hasItalic = font.tables.post && font.tables.post.italicAngle !== 0;
+
+        // Calculate scores for uploaded font
+        const scores = {
+            contentQuality: 50, // Base score for uploaded font
+            weightsScore: Math.min(100, 15 + (weights.length * 9) + (hasItalic ? 15 : 0) + (weights.length >= 5 ? 12 : 0)),
+            technicalScore: Math.min(100, 25 +
+                (features.opentype ? 15 : 0) +
+                (features.webfont ? 12 : 0) +
+                (features.variable ? 20 : 0) +
+                (features.hebrew ? 15 : 0) +
+                (features.ligatures ? 8 : 0)
+            ),
+            optimizationScore: 70, // Base score
+            mentionsScore: 0
+        };
+
+        scores.final = Math.round(
+            (scores.contentQuality * 0.25) +
+            (scores.weightsScore * 0.30) +
+            (scores.technicalScore * 0.20) +
+            (scores.optimizationScore * 0.15) +
+            (scores.mentionsScore * 0.10)
+        );
+
+        console.log('✅ ניתוח קובץ הושלם');
+
+        res.json({
+            success: true,
+            data: {
+                fontName,
+                source: 'file',
+                fileName: req.file.originalname,
+                fileSize: req.file.size,
+                features,
+                weights: {
+                    detected: weights,
+                    count: weights.length,
+                    hasItalic
+                },
+                scores,
+                glyphCount: font.glyphs ? Object.keys(font.glyphs.glyphs).length : 0
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ שגיאה בניתוח קובץ:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to analyze font file',
+            details: error.message
         });
     }
 });
