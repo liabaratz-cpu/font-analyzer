@@ -391,28 +391,6 @@
                 </div>
             </div>
 
-            <div style="text-align: center; margin: 20px 0; color: #666;">
-                <strong>או</strong>
-            </div>
-
-            <div class="input-section">
-                <label for="fontFile">העלה קובץ פונט לסריקה טכנית מדויקת:</label>
-                <div class="input-group">
-                    <input
-                        type="file"
-                        id="fontFile"
-                        accept=".ttf,.otf,.woff,.woff2"
-                        style="flex: 1; padding: 10px; border: 2px dashed #667eea; border-radius: 10px; background: #f8f9fa;"
-                    >
-                    <button class="btn" onclick="analyzeFontFile()">
-                        📁 נתח קובץ
-                    </button>
-                </div>
-                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                    ✓ תומך ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
-                </p>
-            </div>
-
             <div class="error" id="error">
                 <div class="error-title">❌ שגיאה</div>
                 <div class="error-message" id="errorMessage"></div>
@@ -538,6 +516,28 @@
                     <div class="info-title">💡 עצות לשיפור הציון</div>
                     <div id="tipsContent" style="font-size: 0.95em; line-height: 1.6; color: #333;"></div>
                 </div>
+
+                <!-- Upload section - appears after URL analysis -->
+                <div class="info-section" id="uploadSection" style="display: none; background: #f0f9ff; border: 2px dashed #3b82f6; border-radius: 12px;">
+                    <div class="info-title">📊 רוצה פרטים טכניים מדויקים יותר?</div>
+                    <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                        העלה את קובץ הפונט המקורי כדי לקבל ניתוח מדויק של התכונות הטכניות (OpenType, Ligatures, תמיכה בשפות ועוד)
+                    </p>
+                    <div class="input-group">
+                        <input
+                            type="file"
+                            id="fontFile"
+                            accept=".ttf,.otf,.woff,.woff2"
+                            style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: #fff;"
+                        >
+                        <button class="btn" onclick="analyzeFontFile()">
+                            🔬 נתח קובץ
+                        </button>
+                    </div>
+                    <p style="font-size: 0.85em; color: #999; margin-top: 12px;">
+                        ✓ תומך ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -591,6 +591,9 @@
                 if (!result.success) {
                     throw new Error(result.error || 'שגיאה לא ידועה');
                 }
+
+                // Store the URL data for later file upload merge
+                currentUrlData = result.data;
 
                 displayResults(result.data);
                 hideLoading();
@@ -709,6 +712,11 @@
                     '</ul>';
                 document.getElementById('improvementTips').style.display = 'block';
             }
+
+            // Show file upload section only after URL analysis (not after file upload)
+            if (data.source !== 'file') {
+                document.getElementById('uploadSection').style.display = 'block';
+            }
         }
 
         function getScoreDescription(score) {
@@ -789,6 +797,9 @@
         });
 
         // New function for file upload analysis
+        // Store the current URL analysis data
+        let currentUrlData = null;
+
         async function analyzeFontFile() {
             const fileInput = document.getElementById('fontFile');
             const file = fileInput.files[0];
@@ -799,9 +810,8 @@
             }
 
             hideError();
-            hideResults();
             showLoading();
-            document.getElementById('loadingText').textContent = 'מנתח קובץ פונט...';
+            document.getElementById('loadingText').textContent = 'מנתח קובץ פונט להפקת פרטים טכניים...';
 
             try {
                 const formData = new FormData();
@@ -822,9 +832,30 @@
                     throw new Error(result.error || 'שגיאה לא ידועה');
                 }
 
-                displayResults(result.data);
+                // Merge file data with current URL data
+                if (currentUrlData) {
+                    // Keep weights and mentions from URL, update only features from file
+                    const mergedData = {
+                        ...currentUrlData,
+                        features: result.data.features,
+                        technicalDataSource: 'file'
+                    };
+
+                    // Recalculate technical score based on file features
+                    mergedData.scores.technicalScore = result.data.scores.technicalScore;
+
+                    displayResults(mergedData);
+
+                    // Show success message
+                    const uploadSection = document.getElementById('uploadSection');
+                    uploadSection.style.background = '#ecfdf5';
+                    uploadSection.style.borderColor = '#10b981';
+                    uploadSection.innerHTML = '<div class="info-title">✅ הפרטים הטכניים עודכנו מהקובץ!</div><p style="color: #059669; font-weight: 600;">התכונות הטכניות (OpenType, Ligatures, תמיכה בשפות) עודכנו בהתבסס על הקובץ שהעלית</p>';
+                } else {
+                    displayResults(result.data);
+                }
+
                 hideLoading();
-                showResults();
 
             } catch (error) {
                 hideLoading();
