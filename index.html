@@ -370,6 +370,28 @@
                 </div>
             </div>
 
+            <div style="text-align: center; margin: 20px 0; color: #666;">
+                <strong>או</strong>
+            </div>
+
+            <div class="input-section">
+                <label for="fontFile">העלה קובץ פונט לסריקה טכנית מדויקת:</label>
+                <div class="input-group">
+                    <input
+                        type="file"
+                        id="fontFile"
+                        accept=".ttf,.otf,.woff,.woff2"
+                        style="flex: 1; padding: 10px; border: 2px dashed #667eea; border-radius: 10px; background: #f8f9fa;"
+                    >
+                    <button class="btn" onclick="analyzeFontFile()">
+                        📁 נתח קובץ
+                    </button>
+                </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    ✓ תומך ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
+                </p>
+            </div>
+
             <div class="error" id="error">
                 <div class="error-title">❌ שגיאה</div>
                 <div class="error-message" id="errorMessage"></div>
@@ -463,6 +485,37 @@
                         <div class="detail-label">ציון אזכורים</div>
                         <div class="detail-value" id="mentionsScoreValue">0</div>
                     </div>
+                </div>
+
+                <!-- Score Explanation -->
+                <div class="info-section" id="scoreExplanation" style="display: none; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                    <div class="info-title">📊 הסבר על הציון</div>
+                    <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
+                        <p style="margin-bottom: 15px;"><strong>הציון הכולל מורכב מ-5 מרכיבים:</strong></p>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                                <strong>איכות תוכן (25%):</strong> פלטפורמה, תיאור, HTTPS, אורך תוכן
+                            </li>
+                            <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                                <strong>משקלים (30%):</strong> מספר משקלים, Italic, מגוון רחב
+                            </li>
+                            <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                                <strong>תכונות טכניות (15%):</strong> OpenType, Variable Font, ליגטורות, עברית
+                            </li>
+                            <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+                                <strong>אופטימיזציה (10%):</strong> HTTPS, תיאור טוב, פלטפורמה מוכרת
+                            </li>
+                            <li style="padding: 8px 0;">
+                                <strong>אזכורים ברשת (20%):</strong> מספר תוצאות בגוגל, נוכחות ברשת
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Improvement Tips -->
+                <div class="info-section" id="improvementTips" style="display: none; background: #fff9e6; border-right: 4px solid #ffd700;">
+                    <div class="info-title">💡 עצות לשיפור הציון</div>
+                    <div id="tipsContent" style="font-size: 0.95em; line-height: 1.6; color: #333;"></div>
                 </div>
             </div>
         </div>
@@ -621,6 +674,19 @@
                     document.getElementById('mentionsScoreValue').textContent = data.scores.mentionsScore;
                 }
             }
+
+            // Show score explanation
+            document.getElementById('scoreExplanation').style.display = 'block';
+
+            // Generate and show improvement tips
+            const tips = generateImprovementTips(data);
+            if (tips.length > 0) {
+                const tipsContent = document.getElementById('tipsContent');
+                tipsContent.innerHTML = '<ul style="list-style: none; padding: 0; margin: 0;">' +
+                    tips.map(tip => `<li style="padding: 10px 0; border-bottom: 1px solid #f0e68c;">${tip}</li>`).join('') +
+                    '</ul>';
+                document.getElementById('improvementTips').style.display = 'block';
+            }
         }
 
         function getScoreDescription(score) {
@@ -699,6 +765,89 @@
                 analyzeFontPage();
             }
         });
+
+        // New function for file upload analysis
+        async function analyzeFontFile() {
+            const fileInput = document.getElementById('fontFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError('נא לבחור קובץ פונט');
+                return;
+            }
+
+            hideError();
+            hideResults();
+            showLoading();
+            document.getElementById('loadingText').textContent = 'מנתח קובץ פונט...';
+
+            try {
+                const formData = new FormData();
+                formData.append('fontFile', file);
+
+                const response = await fetch(`${API_URL}/api/analyze-file`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`שגיאת שרת: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error || 'שגיאה לא ידועה');
+                }
+
+                displayResults(result.data);
+                hideLoading();
+                showResults();
+
+            } catch (error) {
+                hideLoading();
+                showError(`שגיאה בניתוח הקובץ: ${error.message}`);
+            }
+        }
+
+        // Generate improvement tips based on scores
+        function generateImprovementTips(data) {
+            const tips = [];
+            const scores = data.scores;
+
+            if (scores.weightsScore < 70) {
+                tips.push('📏 <strong>הוסף משקלים נוספים:</strong> פונט עם 5+ משקלים מקבל ציון גבוה יותר. שקול להוסיף Light, Regular, Medium, Bold, Black.');
+            }
+
+            if (scores.technicalScore < 70) {
+                if (!data.features.variable) {
+                    tips.push('🔧 <strong>Variable Font:</strong> המר את הפונט ל-Variable Font לתמיכה בטווח משקלים רציף.');
+                }
+                if (!data.features.ligatures) {
+                    tips.push('✨ <strong>הוסף Ligatures:</strong> ליגטורות משפרות את מראה הפונט ומעלות את הציון הטכני.');
+                }
+                if (!data.features.hebrew) {
+                    tips.push('🔤 <strong>תמיכה בעברית:</strong> הוספת תווים עבריים תרחיב את קהל היעד.');
+                }
+            }
+
+            if (scores.contentQuality < 70) {
+                tips.push('📝 <strong>שפר את התיאור:</strong> הוסף תיאור מפורט בדף הפונט (לפחות 50 תווים).');
+                if (data.platform === 'אתר עצמאי') {
+                    tips.push('🌐 <strong>העלה לפלטפורמה מוכרת:</strong> Google Fonts או Adobe Fonts יעניקו ציון גבוה יותר.');
+                }
+            }
+
+            if (data.mentions && data.mentions.totalResults < 1000) {
+                tips.push('📢 <strong>הגבר חשיפה:</strong> שתף את הפונט ברשתות חברתיות, בלוגים ופורומים של עיצוב.');
+            }
+
+            if (scores.final >= 90) {
+                tips.push('🎉 <strong>מעולה!</strong> הפונט שלך בציון גבוה מאוד. המשך לקדם אותו ברשתות.');
+            }
+
+            return tips;
+        }
     </script>
 </body>
 </html>
