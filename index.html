@@ -710,55 +710,16 @@
         }
 
         function displayResults(data) {
-            // Final Score
+            // Hide all technical sections - will only show after file upload
+            document.getElementById('fontInfoSection').style.display = 'none';
+            document.getElementById('weightsSection').style.display = 'none';
+            document.getElementById('featuresSection').style.display = 'none';
+            document.getElementById('scoresSection').style.display = 'none';
+
+            // Show only score card
             const finalScore = data.scores.final;
             document.getElementById('finalScore').textContent = finalScore;
             document.getElementById('scoreDescription').textContent = getScoreDescription(finalScore);
-
-            // Font Info
-            document.getElementById('fontName').textContent = data.fontName || 'No זוהה';
-            document.getElementById('platform').textContent = data.platform || 'No זוהה';
-            document.getElementById('domain').textContent = data.domain || 'No זוהה';
-            document.getElementById('https').innerHTML = data.hasHttps
-                ? '<span class="badge badge-success">✓ Secure</span>'
-                : '<span class="badge badge-warning">✗ No Secure</span>';
-
-            // Weights
-            document.getElementById('weightsCount').textContent = data.weights.count || 0;
-            document.getElementById('hasItalic').innerHTML = data.weights.hasItalic
-                ? '<span class="badge badge-success">✓ Yes</span>'
-                : '<span class="badge badge-warning">✗ No</span>';
-
-            // Weights List
-            const weightsList = document.getElementById('weightsList');
-            if (data.weights.detected && data.weights.detected.length > 0) {
-                weightsList.innerHTML = '<div class="weights-list">' +
-                    data.weights.detected.map(w =>
-                        `<div class="weight-badge">${getWeightName(w)}</div>`
-                    ).join('') +
-                    '</div>';
-            } else {
-                weightsList.innerHTML = '<p style="color: #666;">No זוהו Weights ספציפיים</p>';
-            }
-
-            // Features
-            const featuresList = document.getElementById('featuresList');
-            const features = data.features;
-            featuresList.innerHTML = Object.entries(features)
-                .map(([key, value]) => `
-                    <div class="info-row">
-                        <span class="info-key">${getFeatureName(key)}:</span>
-                        <span class="info-value">
-                            ${value ? '<span class="badge badge-success">✓ Supported</span>' : '<span class="badge badge-warning">✗ No Supported</span>'}
-                        </span>
-                    </div>
-                `).join('');
-
-            // Detailed Scores
-            document.getElementById('contentQuality').textContent = data.scores.contentQuality;
-            document.getElementById('weightsScore').textContent = data.scores.weightsScore;
-            document.getElementById('technicalScore').textContent = data.scores.technicalScore;
-            document.getElementById('optimizationScore').textContent = data.scores.optimizationScore;
 
             // Mentions
             if (data.mentions) {
@@ -855,6 +816,60 @@
             return names[key] || key;
         }
 
+        // Function to populate technical details after file upload
+        function displayTechnicalDetails(data) {
+            // Font Info
+            document.getElementById('fontName').textContent = data.fontName || 'Not detected';
+            document.getElementById('platform').textContent = data.platform || 'Not detected';
+            document.getElementById('domain').textContent = data.domain || 'Not detected';
+            document.getElementById('https').innerHTML = data.hasHttps
+                ? '<span class="badge badge-success">✓ Secure</span>'
+                : '<span class="badge badge-warning">✗ Not Secure</span>';
+
+            // Weights
+            document.getElementById('weightsCount').textContent = data.weights.count || 0;
+            document.getElementById('hasItalic').innerHTML = data.weights.hasItalic
+                ? '<span class="badge badge-success">✓ Yes</span>'
+                : '<span class="badge badge-warning">✗ No</span>';
+
+            // Weights List
+            const weightsList = document.getElementById('weightsList');
+            if (data.weights.detected && data.weights.detected.length > 0) {
+                weightsList.innerHTML = '<div class="weights-list">' +
+                    data.weights.detected.map(w =>
+                        `<div class="weight-badge">${getWeightName(w)}</div>`
+                    ).join('') +
+                    '</div>';
+            } else {
+                weightsList.innerHTML = '<p style="color: #666;">No specific weights detected</p>';
+            }
+
+            // Features
+            const featuresList = document.getElementById('featuresList');
+            const features = data.features;
+            featuresList.innerHTML = Object.entries(features)
+                .map(([key, value]) => `
+                    <div class="info-row">
+                        <span class="info-key">${getFeatureName(key)}:</span>
+                        <span class="info-value">
+                            ${value ? '<span class="badge badge-success">✓ Supported</span>' : '<span class="badge badge-warning">✗ Not Supported</span>'}
+                        </span>
+                    </div>
+                `).join('');
+
+            // Detailed Scores
+            document.getElementById('contentQuality').textContent = data.scores.contentQuality;
+            document.getElementById('weightsScore').textContent = data.scores.weightsScore;
+            document.getElementById('technicalScore').textContent = data.scores.technicalScore;
+            document.getElementById('optimizationScore').textContent = data.scores.optimizationScore;
+
+            // Show all technical sections
+            document.getElementById('fontInfoSection').style.display = 'block';
+            document.getElementById('weightsSection').style.display = 'block';
+            document.getElementById('featuresSection').style.display = 'block';
+            document.getElementById('scoresSection').style.display = 'block';
+        }
+
         function isValidUrl(string) {
             try {
                 new URL(string);
@@ -944,7 +959,8 @@
                     // Recalculate technical score based on file features
                     mergedData.scores.technicalScore = result.data.scores.technicalScore;
 
-                    displayResults(mergedData);
+                    // Now display the technical details
+                    displayTechnicalDetails(mergedData);
 
                     // Show success message
                     const uploadSection = document.getElementById('uploadSection');
@@ -952,7 +968,9 @@
                     uploadSection.style.borderColor = '#10b981';
                     uploadSection.innerHTML = '<div class="info-title">✅ Technical details updated from file!</div><p style="color: #059669; font-weight: 600;">Technical features (OpenType, Ligatures, language support) updated based on your uploaded file</p>';
                 } else {
+                    // For standalone file analysis (no URL data)
                     displayResults(result.data);
+                    displayTechnicalDetails(result.data);
                 }
 
                 hideLoading();
