@@ -204,6 +204,41 @@ app.post('/api/analyze', async (req, res) => {
     }
 });
 
+// New endpoint - search by font name only (no URL needed)
+app.post('/api/search-font', async (req, res) => {
+    try {
+        const { fontName } = req.body;
+
+        if (!fontName) {
+            return res.status(400).json({
+                success: false,
+                error: 'Font name is required'
+            });
+        }
+
+        console.log('🔍 חיפוש פונט:', fontName);
+
+        // Search for mentions
+        const mentions = await searchFontMentions(fontName, 'unknown');
+
+        res.json({
+            success: true,
+            data: {
+                fontName,
+                mentions
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ שגיאה בחיפוש:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to search font',
+            details: error.message
+        });
+    }
+});
+
 // New endpoint for font file upload analysis
 app.post('/api/analyze-file', upload.single('fontFile'), async (req, res) => {
     try {
