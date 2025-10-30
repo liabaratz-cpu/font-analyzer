@@ -46,14 +46,14 @@ async function searchFontMentions(fontName, platform) {
         // Detect if font name is in Hebrew
         const isHebrew = /[\u0590-\u05FF]/.test(fontName);
 
-        // Very specific search query - always put "פונט" or "font" BEFORE the name
+        // Broader search query that includes various font-related terms
         let query;
         if (isHebrew) {
-            // Hebrew font search - פונט BEFORE the name
-            query = `"פונט ${fontName}" OR "${fontName} פונט" -הורדה -חינם -רעלה -כלה`;
+            // Hebrew font search - multiple variations
+            query = `"${fontName}" (פונט OR טיפוגרפיה OR "עיצוב אותיות") -הורדה -חינם -רעלה -כלה`;
         } else {
-            // English font search - "font" or "typeface" with the name
-            query = `"${fontName} font" OR "${fontName} typeface" OR "font ${fontName}" -"font awesome" -download -free`;
+            // English font search - multiple variations
+            query = `"${fontName}" (font OR typeface OR typography OR "font family") -"font awesome" -download -free`;
         }
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=30&api_key=${SERPAPI_KEY}`;
 
