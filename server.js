@@ -199,11 +199,11 @@ function analyzeData(data, urlObj) {
     const hasHebrew = /[\u0590-\u05FF]/.test(data.bodyText) || /hebrew|עברית/i.test(data.bodyText);
     const features = {
         hebrew: hasHebrew,
-        opentype: /opentype|otf/i.test(data.bodyText),
-        webfont: /webfont|woff/i.test(data.bodyText),
-        variable: /variable.?font/i.test(data.bodyText),
-        ligatures: /ligatur/i.test(data.bodyText),
-        alternates: /alternate|stylistic/i.test(data.bodyText),
+        opentype: /opentype|otf|אופן טייפ/i.test(data.bodyText),
+        webfont: /webfont|woff|פונט אינטרנט|פונט ווב/i.test(data.bodyText),
+        variable: /variable.?font|וריאבל|פונט משתנה/i.test(data.bodyText),
+        ligatures: /ligatur|ליגטור/i.test(data.bodyText),
+        alternates: /alternate|stylistic|אלטרנטיב|חלופ/i.test(data.bodyText),
         latin: true
     };
 
@@ -258,22 +258,22 @@ function extractWeights(text) {
     const textLower = text.toLowerCase();
 
     const weightPatterns = {
-        'thin': 100,
-        'hairline': 100,
-        'extra.?light': 200,
-        'ultra.?light': 200,
-        'light': 300,
-        'regular': 400,
-        'normal': 400,
-        'book': 400,
-        'medium': 500,
-        'semi.?bold': 600,
-        'demi.?bold': 600,
-        'bold': 700,
-        'extra.?bold': 800,
-        'ultra.?bold': 800,
-        'black': 900,
-        'heavy': 900
+        'thin|דק': 100,
+        'hairline|שערה': 100,
+        'extra.?light|אקסטרה.?לייט|דק במיוחד': 200,
+        'ultra.?light|אולטרה.?לייט': 200,
+        'light|לייט|קל': 300,
+        'regular|רגיל|רגולר': 400,
+        'normal|נורמלי': 400,
+        'book|ספר': 400,
+        'medium|מדיום|בינוני': 500,
+        'semi.?bold|סמי.?בולד|חצי.?מודגש': 600,
+        'demi.?bold|דמי.?בולד': 600,
+        'bold(?!\\s*extra)|בולד(?!\\s*אקסטרה)|מודגש': 700,
+        'extra.?bold|אקסטרה.?בולד|מודגש במיוחד': 800,
+        'ultra.?bold|אולטרה.?בולד': 800,
+        'black|בלק|שחור': 900,
+        'heavy|כבד|הבי': 900
     };
 
     for (const [pattern, weight] of Object.entries(weightPatterns)) {
@@ -293,7 +293,7 @@ function extractWeights(text) {
         });
     }
 
-    const hasItalic = /italic|oblique/i.test(text);
+    const hasItalic = /italic|oblique|נטוי|אלכסוני/i.test(text);
     const weightsArray = Array.from(detectedWeights).sort((a, b) => a - b);
 
     return {
