@@ -12,44 +12,54 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #fafafa;
             min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 0;
+            margin: 0;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             width: 100%;
+            margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 80px 40px 60px;
             text-align: center;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 42px;
+            margin-bottom: 16px;
             font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.95;
+            font-size: 20px;
+            color: #666;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .accent {
+            color: #f9c554;
+            font-weight: 700;
         }
 
         .content {
-            padding: 40px;
+            padding: 60px 40px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .input-section {
@@ -71,37 +81,39 @@
 
         .input-group input {
             flex: 1;
-            padding: 15px 20px;
+            padding: 16px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
             direction: ltr;
             text-align: left;
+            background: #fff;
         }
 
         .input-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #f9c554;
+            box-shadow: 0 0 0 3px rgba(249, 197, 84, 0.1);
         }
 
         .btn {
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 32px;
+            background: #32373c;
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             white-space: nowrap;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            background: #1a1d21;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:disabled {
@@ -167,30 +179,31 @@
         }
 
         .score-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 40px;
-            border-radius: 15px;
+            padding: 48px;
+            border-radius: 12px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
         }
 
         .score-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
+            top: -20px;
+            right: -20px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(249, 197, 84, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.8; }
         }
 
         .score-label {
@@ -224,10 +237,17 @@
         }
 
         .detail-card {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            border-right: 4px solid #667eea;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .detail-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
         .detail-label {
@@ -244,10 +264,11 @@
         }
 
         .info-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: #fafafa;
+            padding: 32px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 1px solid #e8e8e8;
         }
 
         .info-title {
@@ -291,18 +312,18 @@
         }
 
         .badge-success {
-            background: #d4edda;
-            color: #155724;
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #fff3e0;
+            color: #e65100;
         }
 
         .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #e3f2fd;
+            color: #1565c0;
         }
 
         .weights-list {
@@ -313,10 +334,10 @@
         }
 
         .weight-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #f9c554;
+            color: #1a1a1a;
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 6px;
             font-size: 0.9em;
             font-weight: 600;
         }
@@ -350,8 +371,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 כלי בדיקת חשיפת פונט</h1>
-            <p>גלה את רמת החשיפה של הפונט שלך ברשת</p>
+            <h1>מצא את ה<span class="accent">חשיפה</span> המושלמת לפונט שלך</h1>
+            <p>נתח פונטים באמצעות AI וגלה את ביצועי החשיפה שלהם ברשת</p>
         </div>
 
         <div class="content">
