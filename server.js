@@ -43,8 +43,9 @@ async function searchFontMentions(fontName, platform) {
     }
 
     try {
-        const query = `"${fontName}" font`;
-        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=10&api_key=${SERPAPI_KEY}`;
+        // More specific search queries for fonts
+        const query = `"פונט ${fontName}" OR "${fontName} font" OR "${fontName} typeface"`;
+        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=20&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
 
@@ -54,7 +55,14 @@ async function searchFontMentions(fontName, platform) {
 
         const data = await response.json();
 
-        const sources = (data.organic_results || []).slice(0, 5).map(item => ({
+        // Filter results to only font-related content
+        const fontKeywords = ['font', 'typeface', 'פונט', 'טיפוגרפיה', 'typography', 'hebrew font', 'עיצוב', 'design'];
+        const filteredResults = (data.organic_results || []).filter(item => {
+            const text = (item.title + ' ' + (item.snippet || '')).toLowerCase();
+            return fontKeywords.some(keyword => text.includes(keyword.toLowerCase()));
+        });
+
+        const sources = filteredResults.slice(0, 5).map(item => ({
             title: item.title,
             url: item.link,
             snippet: item.snippet || ''
@@ -62,9 +70,31 @@ async function searchFontMentions(fontName, platform) {
 
         const totalResults = data.search_information?.total_results || 0;
 
+        // Also search social media mentions
+        const socialQuery = `"${fontName}" (font OR פונט) site:facebook.com OR site:instagram.com OR site:pinterest.com`;
+        let socialSources = [];
+
+        try {
+            const socialUrl = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(socialQuery)}&num=5&api_key=${SERPAPI_KEY}`;
+            const socialResponse = await fetch(socialUrl);
+            if (socialResponse.ok) {
+                const socialData = await socialResponse.json();
+                socialSources = (socialData.organic_results || []).slice(0, 3).map(item => ({
+                    title: item.title,
+                    url: item.link,
+                    snippet: item.snippet || '',
+                    platform: item.link.includes('facebook') ? 'Facebook' :
+                             item.link.includes('instagram') ? 'Instagram' :
+                             item.link.includes('pinterest') ? 'Pinterest' : 'Social'
+                }));
+            }
+        } catch (socialError) {
+            console.log('Social search failed:', socialError);
+        }
+
         return {
             totalResults: totalResults,
-            sources,
+            sources: [...sources, ...socialSources].slice(0, 8),
             estimated: false
         };
     } catch (error) {
