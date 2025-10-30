@@ -1,18 +1,19 @@
 {
-  "name": "font-exposure-analyzer",
-  "version": "1.0.1",
-  "description": "Font Exposure Analyzer Backend",
+  "name": "font-analyzer",
+  "version": "1.0.0",
+  "description": "Font exposure analyzer API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "puppeteer-core": "^22.0.0",
-    "@sparticuz/chromium": "^121.0.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "@sparticuz/chromium": "^121.0.0",
+    "node-fetch": "^2.7.0"
   }
 }
