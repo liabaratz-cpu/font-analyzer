@@ -208,16 +208,23 @@ async function searchSocialMediaMentions(fontName) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top 10 sources from each platform
+                    // Add top 10 sources from each platform, but only if they actually mention the font name
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
-                            results.sources.push({
-                                platform: platform.name,
-                                title: result.title,
-                                url: result.link,
-                                snippet: result.snippet || ''
-                            });
+                            // Check if font name appears in title or snippet (case insensitive)
+                            const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
+                            const fontNameLower = fontName.toLowerCase();
+
+                            // Only add if the font name actually appears in the content
+                            if (combinedText.includes(fontNameLower)) {
+                                results.sources.push({
+                                    platform: platform.name,
+                                    title: result.title,
+                                    url: result.link,
+                                    snippet: result.snippet || ''
+                                });
+                            }
                         });
                     }
                 }
