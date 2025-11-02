@@ -668,7 +668,10 @@ function analyzeData(data, urlObj) {
     const hostname = urlObj.hostname.toLowerCase();
 
     // Extract font name from H1 or Title, prioritizing H1
-    let fontName = data.h1 || data.title.split('|')[0].split('-')[0].trim();
+    let fontName = data.h1 || data.title;
+
+    // Split by common separators and take the first part
+    fontName = fontName.split('|')[0].split('-')[0].split('–')[0].split(':')[0].trim();
 
     // Remove common prefixes like "פונט", "font", "גופן" from the beginning
     fontName = fontName.replace(/^(פונט|font|גופן)\s+/i, '').trim();
@@ -676,8 +679,8 @@ function analyzeData(data, urlObj) {
     // Remove "font", "typeface" from the end
     fontName = fontName.replace(/\s+(font|typeface|פונט|גופן)$/i, '').trim();
 
-    // Remove special characters and extra spaces, but keep Hebrew text
-    fontName = fontName.replace(/[+\u064B-\u065F\u0670]/g, '').replace(/\s+/g, ' ').trim();
+    // Remove Hebrew diacritics (nikud), special characters and extra spaces
+    fontName = fontName.replace(/[\u0591-\u05C7]/g, '').replace(/[+]/g, '').replace(/\s+/g, ' ').trim();
 
     if (!fontName) {
         const pathParts = urlObj.pathname.split('/').filter(p => p);
