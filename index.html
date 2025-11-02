@@ -803,6 +803,10 @@
                             <div class="detail-value">${data.socialMedia.instagram}</div>
                         </div>
                         <div class="detail-card">
+                            <div class="detail-label">Facebook</div>
+                            <div class="detail-value">${data.socialMedia.facebook}</div>
+                        </div>
+                        <div class="detail-card">
                             <div class="detail-label">Behance</div>
                             <div class="detail-value">${data.socialMedia.behance}</div>
                         </div>
@@ -822,6 +826,30 @@
                             <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0;">
                                 <span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase;">${source.platform}</span>
                                 <a href="${source.url}" target="_blank" style="color: #0693e3; font-weight: 600; text-decoration: none; display: block; margin-top: 8px;">
+                                    ${source.title}
+                                </a>
+                                <p style="color: #666; font-size: 0.9em; margin-top: 8px;">${source.snippet}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <!-- Backlinks -->
+                ${data.backlinks && data.backlinks.totalBacklinks > 0 ? `
+                <div class="info-section">
+                    <div class="info-title">🔗 Backlinks (Pages Linking to This Font)</div>
+                    <div class="info-row">
+                        <span class="info-key">Total Backlinks:</span>
+                        <span class="info-value" style="font-size: 1.3em; font-weight: 700; color: #10b981;">${data.backlinks.totalBacklinks.toLocaleString()}</span>
+                    </div>
+                    ${data.backlinks.sources && data.backlinks.sources.length > 0 ? `
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #333;">Top Backlinks:</h4>
+                        ${data.backlinks.sources.map(source => `
+                            <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0; border-left: 4px solid #10b981;">
+                                <a href="${source.url}" target="_blank" style="color: #10b981; font-weight: 600; text-decoration: none; display: block;">
                                     ${source.title}
                                 </a>
                                 <p style="color: #666; font-size: 0.9em; margin-top: 8px;">${source.snippet}</p>

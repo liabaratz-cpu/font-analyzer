@@ -104,12 +104,55 @@ async function analyzeGoogleRanking(fontPageUrl, fontName) {
     }
 }
 
+// Helper function to search backlinks (pages linking to font page)
+async function searchBacklinks(fontPageUrl) {
+    if (!SERPAPI_KEY) {
+        return {
+            totalBacklinks: 0,
+            sources: []
+        };
+    }
+
+    try {
+        // Google's link: operator to find pages linking to this URL
+        const query = `link:${fontPageUrl}`;
+        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=20&api_key=${SERPAPI_KEY}`;
+
+        const response = await fetch(url);
+
+        if (response.ok) {
+            const data = await response.json();
+            const totalBacklinks = data.search_information?.total_results || 0;
+
+            const sources = (data.organic_results || []).slice(0, 5).map(item => ({
+                title: item.title,
+                url: item.link,
+                snippet: item.snippet || '',
+                type: 'backlink'
+            }));
+
+            return {
+                totalBacklinks,
+                sources
+            };
+        }
+    } catch (error) {
+        console.error('Backlinks search error:', error);
+    }
+
+    return {
+        totalBacklinks: 0,
+        sources: []
+    };
+}
+
 // Helper function to search social media mentions
 async function searchSocialMediaMentions(fontName) {
     if (!SERPAPI_KEY) {
         return {
             twitter: 0,
             instagram: 0,
+            facebook: 0,
             behance: 0,
             dribbble: 0,
             reddit: 0,
@@ -122,6 +165,7 @@ async function searchSocialMediaMentions(fontName) {
         const platforms = [
             { name: 'twitter', query: `site:twitter.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
             { name: 'instagram', query: `site:instagram.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
+            { name: 'facebook', query: `site:facebook.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
             { name: 'behance', query: `site:behance.net (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
             { name: 'dribbble', query: `site:dribbble.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
             { name: 'reddit', query: `site:reddit.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` }
@@ -130,6 +174,7 @@ async function searchSocialMediaMentions(fontName) {
         const results = {
             twitter: 0,
             instagram: 0,
+            facebook: 0,
             behance: 0,
             dribbble: 0,
             reddit: 0,
@@ -434,6 +479,11 @@ app.post('/api/analyze', async (req, res) => {
         console.log('🌐 מחפש אזכורים ברשתות חברתיות...');
         const socialMedia = await searchSocialMediaMentions(analysis.fontName);
         analysis.socialMedia = socialMedia;
+
+        // Search for backlinks (pages linking to this font page)
+        console.log('🔗 מחפש קישורים חוזרים...');
+        const backlinks = await searchBacklinks(url);
+        analysis.backlinks = backlinks;
 
         // Calculate new comprehensive score
         console.log('🎯 מחשב ציון סופי...');
