@@ -208,13 +208,16 @@ async function searchSocialMediaMentions(fontName) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top sources from each platform
+                    // Add top 10 sources from each platform
                     if (data.organic_results && data.organic_results.length > 0) {
-                        results.sources.push({
-                            platform: platform.name,
-                            title: data.organic_results[0].title,
-                            url: data.organic_results[0].link,
-                            snippet: data.organic_results[0].snippet || ''
+                        const topResults = data.organic_results.slice(0, 10);
+                        topResults.forEach(result => {
+                            results.sources.push({
+                                platform: platform.name,
+                                title: result.title,
+                                url: result.link,
+                                snippet: result.snippet || ''
+                            });
                         });
                     }
                 }
