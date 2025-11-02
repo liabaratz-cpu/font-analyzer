@@ -440,9 +440,9 @@ app.post('/api/analyze', async (req, res) => {
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
         
         console.log('📄 טוען דף...');
-        await page.goto(url, { 
-            waitUntil: 'networkidle2',
-            timeout: 30000 
+        await page.goto(url, {
+            waitUntil: 'domcontentloaded',
+            timeout: 60000
         });
 
         console.log('🔎 מחלץ מידע...');
