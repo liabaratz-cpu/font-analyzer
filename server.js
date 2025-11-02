@@ -10,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// SerpAPI key
+// SerpAPI key - for Google Search ranking and results
 const SERPAPI_KEY = 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58ccff5b';
 
 app.use(cors());
@@ -31,11 +31,13 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
-// Helper function to search web for font mentions
-async function searchFontMentions(fontName, platform) {
+// Helper function to analyze Google Search ranking and SEO
+async function analyzeGoogleRanking(fontPageUrl, fontName) {
     if (!SERPAPI_KEY) {
         return {
             totalResults: 0,
+            pageRank: null,
+            pageNumber: null,
             sources: [],
             estimated: true,
             message: 'No API key configured'
@@ -44,7 +46,7 @@ async function searchFontMentions(fontName, platform) {
 
     try {
         const query = `"${fontName}" font`;
-        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=10&api_key=${SERPAPI_KEY}`;
+        const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=100&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
 
@@ -54,16 +56,37 @@ async function searchFontMentions(fontName, platform) {
 
         const data = await response.json();
 
+        // Find where the font page ranks
+        let pageRank = null;
+        let pageNumber = null;
+
+        if (data.organic_results) {
+            const normalizedUrl = fontPageUrl.toLowerCase().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+
+            for (let i = 0; i < data.organic_results.length; i++) {
+                const resultUrl = data.organic_results[i].link.toLowerCase().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+
+                if (resultUrl.includes(normalizedUrl) || normalizedUrl.includes(resultUrl)) {
+                    pageRank = i + 1;
+                    pageNumber = Math.ceil((i + 1) / 10);
+                    break;
+                }
+            }
+        }
+
         const sources = (data.organic_results || []).slice(0, 5).map(item => ({
             title: item.title,
             url: item.link,
-            snippet: item.snippet || ''
+            snippet: item.snippet || '',
+            position: item.position
         }));
 
         const totalResults = data.search_information?.total_results || 0;
 
         return {
             totalResults: totalResults,
+            pageRank: pageRank,
+            pageNumber: pageNumber,
             sources,
             estimated: false
         };
@@ -71,11 +94,264 @@ async function searchFontMentions(fontName, platform) {
         console.error('Search error:', error);
         return {
             totalResults: 0,
+            pageRank: null,
+            pageNumber: null,
             sources: [],
             estimated: true,
             error: 'Failed to search'
         };
     }
+}
+
+// Helper function to search social media mentions
+async function searchSocialMediaMentions(fontName) {
+    if (!SERPAPI_KEY) {
+        return {
+            twitter: 0,
+            instagram: 0,
+            behance: 0,
+            dribbble: 0,
+            reddit: 0,
+            total: 0,
+            sources: []
+        };
+    }
+
+    try {
+        const platforms = [
+            { name: 'twitter', query: `site:twitter.com "${fontName}" font` },
+            { name: 'instagram', query: `site:instagram.com "${fontName}" font` },
+            { name: 'behance', query: `site:behance.net "${fontName}" font` },
+            { name: 'dribbble', query: `site:dribbble.com "${fontName}" font` },
+            { name: 'reddit', query: `site:reddit.com "${fontName}" font` }
+        ];
+
+        const results = {
+            twitter: 0,
+            instagram: 0,
+            behance: 0,
+            dribbble: 0,
+            reddit: 0,
+            total: 0,
+            sources: []
+        };
+
+        // Search each platform
+        for (const platform of platforms) {
+            try {
+                const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(platform.query)}&num=10&api_key=${SERPAPI_KEY}`;
+                const response = await fetch(url);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const count = data.search_information?.total_results || 0;
+                    results[platform.name] = count;
+                    results.total += count;
+
+                    // Add top sources from each platform
+                    if (data.organic_results && data.organic_results.length > 0) {
+                        results.sources.push({
+                            platform: platform.name,
+                            title: data.organic_results[0].title,
+                            url: data.organic_results[0].link,
+                            snippet: data.organic_results[0].snippet || ''
+                        });
+                    }
+                }
+
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (err) {
+                console.error(`Error searching ${platform.name}:`, err);
+            }
+        }
+
+        return results;
+    } catch (error) {
+        console.error('Social media search error:', error);
+        return {
+            twitter: 0,
+            instagram: 0,
+            behance: 0,
+            dribbble: 0,
+            reddit: 0,
+            total: 0,
+            sources: []
+        };
+    }
+}
+
+// Helper function to analyze SEO score
+function analyzeSEO(pageData, url) {
+    const seo = {
+        score: 0,
+        details: {
+            hasTitle: false,
+            titleLength: 0,
+            hasMetaDescription: false,
+            descriptionLength: 0,
+            hasH1: false,
+            hasHttps: false,
+            hasOpenGraph: false,
+            hasStructuredData: false,
+            hasCanonical: false,
+            mobileOptimized: false,
+            imageOptimization: 0,
+            contentLength: 0
+        }
+    };
+
+    let score = 0;
+
+    // Title check (15 points)
+    if (pageData.title && pageData.title.length > 0) {
+        seo.details.hasTitle = true;
+        seo.details.titleLength = pageData.title.length;
+        if (pageData.title.length >= 30 && pageData.title.length <= 60) {
+            score += 15;
+        } else if (pageData.title.length > 0) {
+            score += 8;
+        }
+    }
+
+    // Meta description (15 points)
+    if (pageData.description && pageData.description.length > 0) {
+        seo.details.hasMetaDescription = true;
+        seo.details.descriptionLength = pageData.description.length;
+        if (pageData.description.length >= 120 && pageData.description.length <= 160) {
+            score += 15;
+        } else if (pageData.description.length > 0) {
+            score += 8;
+        }
+    }
+
+    // H1 check (10 points)
+    if (pageData.h1 && pageData.h1.length > 0) {
+        seo.details.hasH1 = true;
+        score += 10;
+    }
+
+    // HTTPS (15 points)
+    if (pageData.hasHttps) {
+        seo.details.hasHttps = true;
+        score += 15;
+    }
+
+    // Open Graph tags (10 points)
+    if (pageData.hasOpenGraph) {
+        seo.details.hasOpenGraph = true;
+        score += 10;
+    }
+
+    // Structured Data (15 points)
+    if (pageData.hasStructuredData) {
+        seo.details.hasStructuredData = true;
+        score += 15;
+    }
+
+    // Canonical URL (5 points)
+    if (pageData.hasCanonical) {
+        seo.details.hasCanonical = true;
+        score += 5;
+    }
+
+    // Mobile optimization (10 points)
+    if (pageData.hasMobileViewport) {
+        seo.details.mobileOptimized = true;
+        score += 10;
+    }
+
+    // Content length (5 points)
+    seo.details.contentLength = pageData.bodyText ? pageData.bodyText.length : 0;
+    if (seo.details.contentLength > 1000) {
+        score += 5;
+    }
+
+    seo.score = Math.min(100, score);
+    return seo;
+}
+
+// Calculate final exposure score based on all metrics
+function calculateFinalScore(data) {
+    const scores = {
+        seoScore: 0,
+        rankingScore: 0,
+        mentionsScore: 0,
+        socialScore: 0,
+        total: 0
+    };
+
+    // SEO Score (25% weight)
+    scores.seoScore = data.seoScore || 0;
+
+    // Google Ranking Score (30% weight)
+    let rankingScore = 0;
+    if (data.googleRanking && data.googleRanking.pageRank !== null) {
+        // First page (1-10) = 90-100 points
+        // Second page (11-20) = 70-89 points
+        // Third page (21-30) = 50-69 points
+        // Beyond = decreasing score
+        if (data.googleRanking.pageRank <= 10) {
+            rankingScore = 100 - (data.googleRanking.pageRank - 1);
+        } else if (data.googleRanking.pageRank <= 20) {
+            rankingScore = 80 - ((data.googleRanking.pageRank - 10) * 2);
+        } else if (data.googleRanking.pageRank <= 30) {
+            rankingScore = 60 - ((data.googleRanking.pageRank - 20) * 2);
+        } else {
+            rankingScore = Math.max(10, 50 - (data.googleRanking.pageRank - 30));
+        }
+    }
+
+    // Total mentions score (20% weight)
+    if (data.googleRanking && data.googleRanking.totalResults > 0) {
+        // Logarithmic scale for total results
+        const results = data.googleRanking.totalResults;
+        if (results >= 10000) {
+            scores.mentionsScore = 100;
+        } else if (results >= 5000) {
+            scores.mentionsScore = 90;
+        } else if (results >= 1000) {
+            scores.mentionsScore = 75;
+        } else if (results >= 500) {
+            scores.mentionsScore = 60;
+        } else if (results >= 100) {
+            scores.mentionsScore = 40;
+        } else if (results >= 10) {
+            scores.mentionsScore = 20;
+        } else {
+            scores.mentionsScore = 10;
+        }
+    }
+
+    // Social Media Score (25% weight)
+    if (data.socialMedia && data.socialMedia.total > 0) {
+        const total = data.socialMedia.total;
+        if (total >= 1000) {
+            scores.socialScore = 100;
+        } else if (total >= 500) {
+            scores.socialScore = 85;
+        } else if (total >= 100) {
+            scores.socialScore = 70;
+        } else if (total >= 50) {
+            scores.socialScore = 55;
+        } else if (total >= 10) {
+            scores.socialScore = 35;
+        } else {
+            scores.socialScore = 15;
+        }
+    }
+
+    scores.rankingScore = Math.round(rankingScore);
+
+    // Calculate weighted total
+    scores.total = Math.round(
+        (scores.seoScore * 0.25) +
+        (scores.rankingScore * 0.30) +
+        (scores.mentionsScore * 0.20) +
+        (scores.socialScore * 0.25)
+    );
+
+    return scores;
 }
 
 app.post('/api/analyze', async (req, res) => {
@@ -115,14 +391,25 @@ app.post('/api/analyze', async (req, res) => {
             const h1 = document.querySelector('h1')?.textContent || '';
             const metaDesc = document.querySelector('meta[name="description"]')?.content || '';
             const ogDesc = document.querySelector('meta[property="og:description"]')?.content || '';
+            const ogTitle = document.querySelector('meta[property="og:title"]')?.content || '';
+            const canonical = document.querySelector('link[rel="canonical"]')?.href || '';
+            const viewport = document.querySelector('meta[name="viewport"]')?.content || '';
             const bodyText = (document.body.innerText || document.body.textContent || '').substring(0, 50000);
-            
+
+            // Check for structured data
+            const jsonLd = document.querySelector('script[type="application/ld+json"]');
+            const hasStructuredData = !!jsonLd;
+
             return {
                 title,
                 h1,
                 description: metaDesc || ogDesc,
                 bodyText,
-                hasHttps: window.location.protocol === 'https:'
+                hasHttps: window.location.protocol === 'https:',
+                hasOpenGraph: !!(ogTitle || ogDesc),
+                hasStructuredData,
+                hasCanonical: !!canonical,
+                hasMobileViewport: !!viewport
             };
         });
 
@@ -132,25 +419,36 @@ app.post('/api/analyze', async (req, res) => {
         const urlObj = new URL(url);
         const analysis = analyzeData(data, urlObj);
 
-        // Search for mentions
-        console.log('🌐 מחפש אזכורים ברשת...');
-        const mentions = await searchFontMentions(analysis.fontName, analysis.platform);
-        analysis.mentions = mentions;
+        // Analyze SEO
+        console.log('📊 מנתח SEO...');
+        const seoAnalysis = analyzeSEO(data, url);
+        analysis.seo = seoAnalysis;
 
-        // Update scores with mentions data if available
-        if (mentions.totalResults > 0 && !mentions.estimated) {
-            const mentionsScore = Math.min(100, Math.log10(mentions.totalResults) * 25);
-            analysis.scores.mentionsScore = Math.round(mentionsScore);
+        // Search for Google ranking
+        console.log('🔍 מחפש דירוג בגוגל...');
+        const googleRanking = await analyzeGoogleRanking(url, analysis.fontName);
+        analysis.googleRanking = googleRanking;
 
-            // Recalculate final score
-            analysis.scores.final = Math.round(
-                (analysis.scores.contentQuality * 0.25) +
-                (analysis.scores.weightsScore * 0.30) +
-                (analysis.scores.technicalScore * 0.15) +
-                (analysis.scores.optimizationScore * 0.10) +
-                (analysis.scores.mentionsScore * 0.20)
-            );
-        }
+        // Search for social media mentions
+        console.log('🌐 מחפש אזכורים ברשתות חברתיות...');
+        const socialMedia = await searchSocialMediaMentions(analysis.fontName);
+        analysis.socialMedia = socialMedia;
+
+        // Calculate new comprehensive score
+        console.log('🎯 מחשב ציון סופי...');
+        const finalScore = calculateFinalScore({
+            seoScore: seoAnalysis.score,
+            googleRanking: googleRanking,
+            socialMedia: socialMedia,
+            weights: analysis.weights,
+            features: analysis.features
+        });
+
+        analysis.scores.final = finalScore.total;
+        analysis.scores.seoScore = finalScore.seoScore;
+        analysis.scores.rankingScore = finalScore.rankingScore;
+        analysis.scores.socialScore = finalScore.socialScore;
+        analysis.scores.mentionsScore = finalScore.mentionsScore;
 
         console.log('✅ הושלם בהצלחה');
 

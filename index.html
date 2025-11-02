@@ -376,8 +376,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Find the <span class="accent">Perfect Exposure</span> for Your Font</h1>
-            <p>Analyze fonts with AI and discover their web performance metrics</p>
+            <h1>Font <span class="accent">Exposure Analyzer</span></h1>
+            <p>Get your font's exposure score (1-100) based on Google ranking, SEO, and social media presence</p>
         </div>
 
         <div class="content">
@@ -410,13 +410,21 @@
             </div>
 
             <div class="results" id="results">
-                <div class="score-card">
-                    <div class="score-label">ציון Exposure כולל</div>
+                <div class="score-card" id="scoreCard">
+                    <div class="score-label">Overall Exposure Score</div>
                     <div class="score-value" id="finalScore">0</div>
                     <div class="score-description" id="scoreDescription">Loading...</div>
+
+                    <!-- Share Button -->
+                    <button id="shareBtn" class="btn" style="margin-top: 20px; background: #10b981; display: none;" onclick="generateShareCard()">
+                        📤 Share Result
+                    </button>
                 </div>
 
-                <div class="info-section">
+                <!-- Hidden canvas for generating share card -->
+                <canvas id="shareCanvas" width="1200" height="630" style="display: none;"></canvas>
+
+                <div class="info-section" id="fontInfoSection" style="display: none;">
                     <div class="info-title">📊 פרטי הפונט</div>
                     <div class="info-row">
                         <span class="info-key">Font Name:</span>
@@ -436,7 +444,7 @@
                     </div>
                 </div>
 
-                <div class="info-section">
+                <div class="info-section" id="weightsSection" style="display: none;">
                     <div class="info-title">⚖️ Weights וגרסאות</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
@@ -452,7 +460,7 @@
                     <div id="weightsList" style="margin-top: 15px;"></div>
                 </div>
 
-                <div class="info-section">
+                <div class="info-section" id="featuresSection" style="display: none;">
                     <div class="info-title">✨ Technical Features</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
                         ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
@@ -470,7 +478,7 @@
                     <div id="mentionsSources" style="margin-top: 15px;"></div>
                 </div>
 
-                <div class="details-grid">
+                <div class="details-grid" id="scoresSection" style="display: none;">
                     <div class="detail-card">
                         <div class="detail-label">איכות תוYes</div>
                         <div class="detail-value" id="contentQuality">0</div>
@@ -710,74 +718,146 @@
         }
 
         function displayResults(data) {
-            // Hide all technical sections - will only show after file upload
-            document.getElementById('fontInfoSection').style.display = 'none';
-            document.getElementById('weightsSection').style.display = 'none';
-            document.getElementById('featuresSection').style.display = 'none';
-            document.getElementById('scoresSection').style.display = 'none';
+            // Store data for later use
+            window.currentAnalysisData = data;
 
-            // Show only score card
+            // Show score card
             const finalScore = data.scores.final;
             document.getElementById('finalScore').textContent = finalScore;
             document.getElementById('scoreDescription').textContent = getScoreDescription(finalScore);
 
-            // Mentions
-            if (data.mentions) {
-                document.getElementById('mentionsSection').style.display = 'block';
-                document.getElementById('mentionsCount').textContent =
-                    data.mentions.totalResults.toLocaleString('he-IL');
+            // Clear results section and rebuild
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="score-card" id="scoreCard">
+                    <div class="score-label">Overall Exposure Score</div>
+                    <div class="score-value" id="finalScore">${finalScore}</div>
+                    <div class="score-description" id="scoreDescription">${getScoreDescription(finalScore)}</div>
+                </div>
 
-                // Status message
-                const mentionsStatus = document.getElementById('mentionsStatus');
-                if (data.mentions.estimated) {
-                    mentionsStatus.textContent = data.mentions.message || 'הערכה (לNo Bing Search API)';
-                    mentionsStatus.style.color = '#ff9800';
-                } else {
-                    mentionsStatus.textContent = '✓ Real data from Google Search';
-                    mentionsStatus.style.color = '#4caf50';
-                }
+                <!-- Google Ranking -->
+                ${data.googleRanking ? `
+                <div class="info-section">
+                    <div class="info-title">🔍 Google Search Ranking</div>
+                    <div class="info-row">
+                        <span class="info-key">Total Results:</span>
+                        <span class="info-value" style="font-size: 1.3em; font-weight: 700; color: #667eea;">${data.googleRanking.totalResults.toLocaleString()}</span>
+                    </div>
+                    ${data.googleRanking.pageRank ? `
+                    <div class="info-row">
+                        <span class="info-key">Your Page Rank:</span>
+                        <span class="info-value" style="font-size: 1.3em; font-weight: 700; color: #10b981;">#${data.googleRanking.pageRank}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Page Number:</span>
+                        <span class="info-value">Page ${data.googleRanking.pageNumber}</span>
+                    </div>
+                    ` : '<p style="color: #999; margin-top: 10px;">Your page was not found in top 100 results</p>'}
+                </div>
+                ` : ''}
 
-                // Sources
-                const mentionsSources = document.getElementById('mentionsSources');
-                if (data.mentions.sources && data.mentions.sources.length > 0) {
-                    mentionsSources.innerHTML = '<h4 style="margin-bottom: 10px; color: #333;">Top Sources (including social media):</h4>' +
-                        data.mentions.sources.map(source => `
-                            <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-right: 3px solid ${source.platform ? '#4267B2' : '#667eea'};">
-                                ${source.platform ? `<span style="background: #e8f0fe; color: #1967d2; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-left: 8px;">${source.platform}</span>` : ''}
-                                <a href="${source.url}" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">
+                <!-- SEO Score -->
+                ${data.seo ? `
+                <div class="info-section">
+                    <div class="info-title">📊 SEO Analysis</div>
+                    <div class="info-row">
+                        <span class="info-key">SEO Score:</span>
+                        <span class="info-value" style="font-size: 1.3em; font-weight: 700; color: #667eea;">${data.seo.score}/100</span>
+                    </div>
+                    <div class="details-grid" style="margin-top: 15px;">
+                        <div class="detail-card">
+                            <div class="detail-label">Title ${data.seo.details.hasTitle ? '✓' : '✗'}</div>
+                            <div class="detail-value" style="font-size: 1.2em;">${data.seo.details.titleLength} chars</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Description ${data.seo.details.hasMetaDescription ? '✓' : '✗'}</div>
+                            <div class="detail-value" style="font-size: 1.2em;">${data.seo.details.descriptionLength} chars</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">HTTPS</div>
+                            <div class="detail-value" style="font-size: 1.5em;">${data.seo.details.hasHttps ? '✓' : '✗'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Mobile Optimized</div>
+                            <div class="detail-value" style="font-size: 1.5em;">${data.seo.details.mobileOptimized ? '✓' : '✗'}</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Social Media -->
+                ${data.socialMedia ? `
+                <div class="info-section">
+                    <div class="info-title">🌐 Social Media Mentions</div>
+                    <div class="info-row">
+                        <span class="info-key">Total Social Mentions:</span>
+                        <span class="info-value" style="font-size: 1.3em; font-weight: 700; color: #667eea;">${data.socialMedia.total.toLocaleString()}</span>
+                    </div>
+                    <div class="details-grid" style="margin-top: 15px;">
+                        <div class="detail-card">
+                            <div class="detail-label">Twitter</div>
+                            <div class="detail-value">${data.socialMedia.twitter}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Instagram</div>
+                            <div class="detail-value">${data.socialMedia.instagram}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Behance</div>
+                            <div class="detail-value">${data.socialMedia.behance}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Dribbble</div>
+                            <div class="detail-value">${data.socialMedia.dribbble}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Reddit</div>
+                            <div class="detail-value">${data.socialMedia.reddit}</div>
+                        </div>
+                    </div>
+                    ${data.socialMedia.sources && data.socialMedia.sources.length > 0 ? `
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #333;">Top Social Sources:</h4>
+                        ${data.socialMedia.sources.map(source => `
+                            <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                                <span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase;">${source.platform}</span>
+                                <a href="${source.url}" target="_blank" style="color: #0693e3; font-weight: 600; text-decoration: none; display: block; margin-top: 8px;">
                                     ${source.title}
                                 </a>
-                                <p style="color: #666; font-size: 0.9em; margin-top: 5px;">${source.snippet}</p>
+                                <p style="color: #666; font-size: 0.9em; margin-top: 8px;">${source.snippet}</p>
                             </div>
-                        `).join('');
-                } else if (!data.mentions.estimated) {
-                    mentionsSources.innerHTML = '<p style="color: #999;">No נמצאו מקורות ספציפיים</p>';
-                }
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
 
-                // Mentions Score
-                if (data.scores.mentionsScore !== undefined) {
-                    document.getElementById('mentionsScoreCard').style.display = 'block';
-                    document.getElementById('mentionsScoreValue').textContent = data.scores.mentionsScore;
-                }
-            }
+                <!-- Score Breakdown -->
+                <div class="info-section" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                    <div class="info-title">📊 Score Breakdown</div>
+                    <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
+                        <p style="margin-bottom: 15px;"><strong>Your exposure score is based on:</strong></p>
+                        <div class="info-row">
+                            <span class="info-key">SEO Score (25%):</span>
+                            <span class="info-value">${data.scores.seoScore || 0}/100</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Google Ranking (30%):</span>
+                            <span class="info-value">${data.scores.rankingScore || 0}/100</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Total Mentions (20%):</span>
+                            <span class="info-value">${data.scores.mentionsScore || 0}/100</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-key">Social Media (25%):</span>
+                            <span class="info-value">${data.scores.socialScore || 0}/100</span>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            // Show score explanation
-            document.getElementById('scoreExplanation').style.display = 'block';
-
-            // Generate and show improvement tips
-            const tips = generateImprovementTips(data);
-            if (tips.length > 0) {
-                const tipsContent = document.getElementById('tipsContent');
-                tipsContent.innerHTML = '<ul style="list-style: none; padding: 0; margin: 0;">' +
-                    tips.map(tip => `<li style="padding: 10px 0; border-bottom: 1px solid #f0e68c;">${tip}</li>`).join('') +
-                    '</ul>';
-                document.getElementById('improvementTips').style.display = 'block';
-            }
-
-            // Show file upload section only after URL analysis (not after file upload)
-            if (data.source !== 'file') {
-                document.getElementById('uploadSection').style.display = 'block';
-            }
+            resultsDiv.classList.add('active');
         }
 
         function getScoreDescription(score) {
@@ -1018,6 +1098,110 @@
             }
 
             return tips;
+        }
+
+        // Generate share card image
+        function generateShareCard() {
+            const canvas = document.getElementById('shareCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Get current data
+            const fontName = window.currentAnalysisData?.fontName || document.getElementById('fontName').textContent || 'My Font';
+            const score = document.getElementById('finalScore').textContent;
+            const description = document.getElementById('scoreDescription').textContent;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add subtle pattern overlay
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            for (let i = 0; i < 20; i++) {
+                ctx.fillRect(i * 60, 0, 30, canvas.height);
+            }
+
+            // White card in center
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 30;
+            ctx.shadowOffsetY = 10;
+            const cardPadding = 80;
+            const cardX = cardPadding;
+            const cardY = cardPadding;
+            const cardWidth = canvas.width - (cardPadding * 2);
+            const cardHeight = canvas.height - (cardPadding * 2);
+            ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 20);
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+
+            // Font name
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = 'bold 60px PT Serif, serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(fontName, canvas.width / 2, 180);
+
+            // Score circle
+            const centerX = canvas.width / 2;
+            const centerY = 340;
+            const radius = 100;
+
+            // Circle background
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#0693e3';
+            ctx.fill();
+
+            // Score text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 80px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(score, centerX, centerY);
+
+            // Description
+            ctx.fillStyle = '#666';
+            ctx.font = '32px Arial, sans-serif';
+            ctx.fillText(description, canvas.width / 2, 480);
+
+            // Website URL at bottom
+            ctx.fillStyle = '#0693e3';
+            ctx.font = 'bold 28px Arial, sans-serif';
+            ctx.fillText('liabaratz-cpu.github.io/font-analyzer', canvas.width / 2, 550);
+
+            // Convert to image and download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${fontName.replace(/\s+/g, '-')}-score.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Polyfill for roundRect if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
         }
     </script>
 </body>
