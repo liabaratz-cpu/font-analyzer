@@ -46,7 +46,8 @@ async function analyzeGoogleRanking(fontPageUrl, fontName) {
 
     try {
         // Search for "font [fontName]" or "[fontName] font" to avoid irrelevant results
-        const query = `(font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR "${fontName}" פונט)`;
+        // Also search with "פונט" and "גופן" (Hebrew words for font)
+        const query = `(font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR "${fontName}" פונט OR גופן "${fontName}" OR "${fontName}" גופן)`;
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=100&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
@@ -163,12 +164,12 @@ async function searchSocialMediaMentions(fontName) {
 
     try {
         const platforms = [
-            { name: 'twitter', query: `site:twitter.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
-            { name: 'instagram', query: `site:instagram.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
-            { name: 'facebook', query: `site:facebook.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
-            { name: 'behance', query: `site:behance.net (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
-            { name: 'dribbble', query: `site:dribbble.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
-            { name: 'reddit', query: `site:reddit.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` }
+            { name: 'twitter', query: `site:twitter.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` },
+            { name: 'instagram', query: `site:instagram.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` },
+            { name: 'facebook', query: `site:facebook.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` },
+            { name: 'behance', query: `site:behance.net (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` },
+            { name: 'dribbble', query: `site:dribbble.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` },
+            { name: 'reddit', query: `site:reddit.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR גופן "${fontName}")` }
         ];
 
         const results = {
@@ -652,9 +653,19 @@ app.post('/api/analyze-file', upload.single('fontFile'), async (req, res) => {
 
 function analyzeData(data, urlObj) {
     const hostname = urlObj.hostname.toLowerCase();
-    
+
+    // Extract font name from H1 or Title, prioritizing H1
     let fontName = data.h1 || data.title.split('|')[0].split('-')[0].trim();
-    fontName = fontName.replace(/\s+(font|typeface)$/i, '').trim();
+
+    // Remove common prefixes like "פונט", "font", "גופן" from the beginning
+    fontName = fontName.replace(/^(פונט|font|גופן)\s+/i, '').trim();
+
+    // Remove "font", "typeface" from the end
+    fontName = fontName.replace(/\s+(font|typeface|פונט|גופן)$/i, '').trim();
+
+    // Remove special characters and extra spaces, but keep Hebrew text
+    fontName = fontName.replace(/[+\u064B-\u065F\u0670]/g, '').replace(/\s+/g, ' ').trim();
+
     if (!fontName) {
         const pathParts = urlObj.pathname.split('/').filter(p => p);
         fontName = pathParts[pathParts.length - 1] || 'Unknown Font';
