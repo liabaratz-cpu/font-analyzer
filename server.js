@@ -179,7 +179,7 @@ async function searchSocialMediaMentions(fontName) {
         const platforms = [
             { name: 'twitter', query: `site:twitter.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
             { name: 'instagram', query: `site:instagram.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
-            { name: 'facebook', query: `site:facebook.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'facebook', query: `(site:facebook.com/*/posts OR site:facebook.com/groups OR site:facebook.com/photo OR site:facebook.com/share) ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
             { name: 'behance', query: `site:behance.net ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
             { name: 'dribbble', query: `site:dribbble.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
             { name: 'reddit', query: `site:reddit.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` }
