@@ -116,8 +116,9 @@ async function searchBacklinks(fontPageUrl) {
     }
 
     try {
-        // Google's link: operator to find pages linking to this URL
-        const query = `link:${fontPageUrl}`;
+        // Search for the URL in quotes to find pages mentioning it
+        // Note: Google's link: operator was deprecated in 2017
+        const query = `"${fontPageUrl}"`;
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=20&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
@@ -126,15 +127,27 @@ async function searchBacklinks(fontPageUrl) {
             const data = await response.json();
             const totalBacklinks = data.search_information?.total_results || 0;
 
-            const sources = (data.organic_results || []).slice(0, 5).map(item => ({
-                title: item.title,
-                url: item.link,
-                snippet: item.snippet || '',
-                type: 'backlink'
-            }));
+            // Filter out the font page itself from results
+            const fontDomain = new URL(fontPageUrl).hostname;
+            const sources = (data.organic_results || [])
+                .filter(item => {
+                    try {
+                        const itemDomain = new URL(item.link).hostname;
+                        return itemDomain !== fontDomain; // Exclude same domain
+                    } catch {
+                        return true;
+                    }
+                })
+                .slice(0, 5)
+                .map(item => ({
+                    title: item.title,
+                    url: item.link,
+                    snippet: item.snippet || '',
+                    type: 'backlink'
+                }));
 
             return {
-                totalBacklinks,
+                totalBacklinks: Math.max(0, totalBacklinks - 1), // Subtract the font page itself
                 sources
             };
         }
