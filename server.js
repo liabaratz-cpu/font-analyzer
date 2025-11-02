@@ -5,6 +5,7 @@ const chromium = require('@sparticuz/chromium');
 const fetch = require('node-fetch');
 const opentype = require('opentype.js');
 const multer = require('multer');
+const OpenAI = require('openai');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
 const app = express();
@@ -12,6 +13,10 @@ const PORT = process.env.PORT || 3000;
 
 // SerpAPI key - for Google Search ranking and results
 const SERPAPI_KEY = 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58ccff5b';
+
+// OpenAI configuration
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 app.use(cors());
 app.use(express.json());
@@ -341,6 +346,174 @@ function analyzeSEO(pageData, url) {
     return seo;
 }
 
+// GPT-powered content analysis
+async function analyzeContentWithGPT(pageData, fontName) {
+    if (!openai) {
+        return {
+            enabled: false,
+            message: 'GPT analysis not configured'
+        };
+    }
+
+    try {
+        const prompt = `You are analyzing a font page for "${fontName}".
+
+Page content:
+Title: ${pageData.title}
+Description: ${pageData.description || pageData.metaDesc || 'No description'}
+H1: ${pageData.h1}
+Content snippet: ${pageData.bodyText?.substring(0, 500) || 'No content'}
+
+Please analyze in Hebrew and provide:
+1. Content Quality Score (1-10): How well is the font described?
+2. Marketing Effectiveness (1-10): Is the text compelling and professional?
+3. Key Strengths: What works well (2-3 points)
+4. Improvement Suggestions: What should be improved (2-3 actionable items)
+
+Respond in JSON format:
+{
+  "contentScore": number,
+  "marketingScore": number,
+  "strengths": ["point1", "point2"],
+  "improvements": ["suggestion1", "suggestion2"]
+}`;
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: 'json_object' },
+            temperature: 0.7
+        });
+
+        const analysis = JSON.parse(response.choices[0].message.content);
+
+        return {
+            enabled: true,
+            ...analysis
+        };
+    } catch (error) {
+        console.error('GPT content analysis error:', error);
+        return {
+            enabled: false,
+            error: 'Failed to analyze content'
+        };
+    }
+}
+
+// GPT-powered sentiment analysis of mentions
+async function analyzeMentionsSentiment(sources, fontName) {
+    if (!openai || !sources || sources.length === 0) {
+        return {
+            enabled: false,
+            positive: 0,
+            neutral: 0,
+            negative: 0,
+            highlights: []
+        };
+    }
+
+    try {
+        const mentionsText = sources.slice(0, 10).map((s, i) =>
+            `${i + 1}. ${s.title} - ${s.snippet}`
+        ).join('\n');
+
+        const prompt = `Analyze sentiment of these mentions for font "${fontName}":
+
+${mentionsText}
+
+Count how many are:
+- Positive (praising, recommending, positive usage)
+- Neutral (just mentioning, factual)
+- Negative (criticism, complaints)
+
+Also extract 2-3 most interesting/important highlights in Hebrew.
+
+Respond in JSON:
+{
+  "positive": number,
+  "neutral": number,
+  "negative": number,
+  "highlights": ["highlight1", "highlight2"]
+}`;
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: 'json_object' },
+            temperature: 0.5
+        });
+
+        const sentiment = JSON.parse(response.choices[0].message.content);
+
+        return {
+            enabled: true,
+            ...sentiment
+        };
+    } catch (error) {
+        console.error('GPT sentiment analysis error:', error);
+        return {
+            enabled: false,
+            positive: 0,
+            neutral: 0,
+            negative: 0,
+            highlights: []
+        };
+    }
+}
+
+// GPT-powered overall summary and recommendations
+async function generateSummaryAndRecommendations(allData, fontName) {
+    if (!openai) {
+        return {
+            enabled: false
+        };
+    }
+
+    try {
+        const prompt = `You are analyzing overall exposure for font "${fontName}".
+
+Stats:
+- SEO Score: ${allData.scores?.seoScore || 0}/100
+- Google Ranking: ${allData.googleRanking?.pageRank ? `#${allData.googleRanking.pageRank}` : 'Not in top 100'}
+- Total Social Mentions: ${allData.socialMedia?.total || 0}
+- Facebook: ${allData.socialMedia?.facebook || 0}
+- Instagram: ${allData.socialMedia?.instagram || 0}
+- Twitter: ${allData.socialMedia?.twitter || 0}
+- Backlinks: ${allData.backlinks?.totalBacklinks || 0}
+
+Provide in Hebrew:
+1. Brief Summary (2-3 sentences): Overall exposure status
+2. Top 3 Recommendations: Specific, actionable advice to improve exposure
+3. Priority Level: "high" (needs urgent work), "medium" (doing okay), or "low" (excellent)
+
+Respond in JSON:
+{
+  "summary": "text",
+  "recommendations": ["rec1", "rec2", "rec3"],
+  "priority": "high|medium|low"
+}`;
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            response_format: { type: 'json_object' },
+            temperature: 0.7
+        });
+
+        const result = JSON.parse(response.choices[0].message.content);
+
+        return {
+            enabled: true,
+            ...result
+        };
+    } catch (error) {
+        console.error('GPT summary error:', error);
+        return {
+            enabled: false
+        };
+    }
+}
+
 // Calculate final exposure score based on all metrics
 function calculateFinalScore(data) {
     const scores = {
@@ -524,6 +697,29 @@ app.post('/api/analyze', async (req, res) => {
         analysis.scores.rankingScore = finalScore.rankingScore;
         analysis.scores.socialScore = finalScore.socialScore;
         analysis.scores.mentionsScore = finalScore.mentionsScore;
+
+        // GPT-powered intelligent analysis
+        if (openai) {
+            console.log('🤖 מפעיל ניתוח חכם עם GPT...');
+
+            // Analyze page content quality
+            const contentAnalysis = await analyzeContentWithGPT(data, analysis.fontName);
+            analysis.gptContentAnalysis = contentAnalysis;
+
+            // Analyze sentiment of social mentions
+            const allSources = [
+                ...(socialMedia.sources || []),
+                ...(googleRanking.sources || [])
+            ];
+            const sentimentAnalysis = await analyzeMentionsSentiment(allSources, analysis.fontName);
+            analysis.gptSentiment = sentimentAnalysis;
+
+            // Generate overall summary and recommendations
+            const summary = await generateSummaryAndRecommendations(analysis, analysis.fontName);
+            analysis.gptSummary = summary;
+
+            console.log('✅ ניתוח חכם הושלם');
+        }
 
         console.log('✅ הושלם בהצלחה');
 
