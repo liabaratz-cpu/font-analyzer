@@ -221,8 +221,25 @@ async function searchSocialMediaMentions(fontName) {
                             const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Only add if the font name actually appears in the content
-                            if (combinedText.includes(fontNameLower)) {
+                            // Only add if BOTH the font name AND a font-related keyword appear together
+                            const hasFontName = combinedText.includes(fontNameLower);
+                            const hasFontKeyword = /(\bפונט\b|\bfont\b|\bגופן\b)/.test(combinedText);
+
+                            // Also check that they appear close to each other (within 50 characters)
+                            let isRelevant = false;
+                            if (hasFontName && hasFontKeyword) {
+                                const fontNameIndex = combinedText.indexOf(fontNameLower);
+                                const fontKeywordMatches = combinedText.match(/(\bפונט\b|\bfont\b|\bגופן\b)/g);
+                                if (fontKeywordMatches) {
+                                    // Check if any font keyword is within 50 chars of font name
+                                    isRelevant = fontKeywordMatches.some(keyword => {
+                                        const keywordIndex = combinedText.indexOf(keyword);
+                                        return Math.abs(keywordIndex - fontNameIndex) < 50;
+                                    });
+                                }
+                            }
+
+                            if (isRelevant) {
                                 results.sources.push({
                                     platform: platform.name,
                                     title: result.title,
