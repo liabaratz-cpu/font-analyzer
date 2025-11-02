@@ -45,7 +45,8 @@ async function analyzeGoogleRanking(fontPageUrl, fontName) {
     }
 
     try {
-        const query = `"${fontName}" font`;
+        // Search for "font [fontName]" or "[fontName] font" to avoid irrelevant results
+        const query = `(font "${fontName}" OR "${fontName}" font OR פונט "${fontName}" OR "${fontName}" פונט)`;
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=100&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
@@ -119,11 +120,11 @@ async function searchSocialMediaMentions(fontName) {
 
     try {
         const platforms = [
-            { name: 'twitter', query: `site:twitter.com "${fontName}" font` },
-            { name: 'instagram', query: `site:instagram.com "${fontName}" font` },
-            { name: 'behance', query: `site:behance.net "${fontName}" font` },
-            { name: 'dribbble', query: `site:dribbble.com "${fontName}" font` },
-            { name: 'reddit', query: `site:reddit.com "${fontName}" font` }
+            { name: 'twitter', query: `site:twitter.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
+            { name: 'instagram', query: `site:instagram.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
+            { name: 'behance', query: `site:behance.net (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
+            { name: 'dribbble', query: `site:dribbble.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` },
+            { name: 'reddit', query: `site:reddit.com (font "${fontName}" OR "${fontName}" font OR פונט "${fontName}")` }
         ];
 
         const results = {
