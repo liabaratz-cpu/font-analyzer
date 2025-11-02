@@ -45,10 +45,9 @@ async function analyzeGoogleRanking(fontPageUrl, fontName) {
     }
 
     try {
-        // Search for exact phrase "font [fontName]" or "[fontName] font" to avoid irrelevant results
-        // Use quotes to force exact match of font name
-        // Also search with "פונט" and "גופן" (Hebrew words for font)
-        const query = `("${fontName}" AND (font OR פונט OR גופן))`;
+        // Search for common phrases people use: "פונט [name]", "font [name]", "גופן [name]"
+        // This matches natural search queries
+        const query = `("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}" OR "${fontName} פונט" OR "${fontName} font" OR "${fontName} גופן")`;
         const url = `https://serpapi.com/search?engine=google&q=${encodeURIComponent(query)}&num=100&api_key=${SERPAPI_KEY}`;
 
         const response = await fetch(url);
@@ -178,12 +177,12 @@ async function searchSocialMediaMentions(fontName) {
 
     try {
         const platforms = [
-            { name: 'twitter', query: `site:twitter.com "${fontName}" (font OR פונט OR גופן)` },
-            { name: 'instagram', query: `site:instagram.com "${fontName}" (font OR פונט OR גופן)` },
-            { name: 'facebook', query: `site:facebook.com "${fontName}" (font OR פונט OR גופן)` },
-            { name: 'behance', query: `site:behance.net "${fontName}" (font OR פונט OR גופן)` },
-            { name: 'dribbble', query: `site:dribbble.com "${fontName}" (font OR פונט OR גופן)` },
-            { name: 'reddit', query: `site:reddit.com "${fontName}" (font OR פונט OR גופן)` }
+            { name: 'twitter', query: `site:twitter.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'instagram', query: `site:instagram.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'facebook', query: `site:facebook.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'behance', query: `site:behance.net ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'dribbble', query: `site:dribbble.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` },
+            { name: 'reddit', query: `site:reddit.com ("פונט ${fontName}" OR "font ${fontName}" OR "גופן ${fontName}")` }
         ];
 
         const results = {
