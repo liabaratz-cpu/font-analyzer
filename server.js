@@ -421,10 +421,11 @@ Respond in JSON format:
             ...analysis
         };
     } catch (error) {
-        console.error('GPT content analysis error:', error);
+        console.error('GPT content analysis error:', error.message);
         return {
             enabled: false,
-            error: 'Failed to analyze content'
+            error: 'Failed to analyze content',
+            errorMessage: error.message
         };
     }
 }
@@ -479,13 +480,14 @@ Respond in JSON:
             ...sentiment
         };
     } catch (error) {
-        console.error('GPT sentiment analysis error:', error);
+        console.error('GPT sentiment analysis error:', error.message);
         return {
             enabled: false,
             positive: 0,
             neutral: 0,
             negative: 0,
-            highlights: []
+            highlights: [],
+            errorMessage: error.message
         };
     }
 }
@@ -536,9 +538,10 @@ Respond in JSON:
             ...result
         };
     } catch (error) {
-        console.error('GPT summary error:', error);
+        console.error('GPT summary error:', error.message);
         return {
-            enabled: false
+            enabled: false,
+            errorMessage: error.message
         };
     }
 }
