@@ -16,7 +16,11 @@ const SERPAPI_KEY = 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58c
 
 // OpenAI configuration
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
-const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+const openai = OPENAI_API_KEY ? new OpenAI({
+    apiKey: OPENAI_API_KEY,
+    timeout: 60000, // 60 seconds
+    maxRetries: 3
+}) : null;
 
 // Log OpenAI status on startup
 console.log('🤖 OpenAI Status:');
