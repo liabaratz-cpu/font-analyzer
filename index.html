@@ -735,6 +735,16 @@
                     <div class="score-description" id="scoreDescription">${getScoreDescription(finalScore)}</div>
                 </div>
 
+                <!-- Font Visual Description -->
+                ${data.fontDescription && data.fontDescription.enabled ? `
+                <div class="info-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+                    <div style="font-size: 1.5em; margin-bottom: 15px;">✨ תיאור הפונט</div>
+                    <p style="font-size: 1.1em; line-height: 1.8; margin: 0; opacity: 0.95;">
+                        ${data.fontDescription.description}
+                    </p>
+                </div>
+                ` : ''}
+
                 <!-- Google Ranking -->
                 ${data.googleRanking ? `
                 <div class="info-section">
@@ -872,10 +882,20 @@
 
                         ${data.aiSummary.recommendations && data.aiSummary.recommendations.length > 0 ? `
                         <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                            <strong style="display: block; margin-bottom: 12px;">💡 Recommendations:</strong>
-                            <ol style="margin: 0; padding-right: 20px; line-height: 1.8;">
-                                ${data.aiSummary.recommendations.map(rec => `<li style="margin-bottom: 8px;">${rec}</li>`).join('')}
-                            </ol>
+                            <strong style="display: block; margin-bottom: 15px; font-size: 1.1em;">💡 המלצות לפעולה:</strong>
+                            ${data.aiSummary.recommendations.map((rec, i) => `
+                                <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-right: 4px solid ${rec.title.includes('CRITICAL') ? '#ff4444' : rec.title.includes('🔗') ? '#ffa500' : '#4CAF50'};">
+                                    <div style="font-weight: 700; margin-bottom: 8px; font-size: 1em;">${typeof rec === 'string' ? rec : rec.title}</div>
+                                    ${typeof rec === 'object' ? `
+                                        <div style="font-size: 0.9em; line-height: 1.6; opacity: 0.95;">
+                                            <div style="margin-bottom: 6px;"><strong>✓ פעולה:</strong> ${rec.action}</div>
+                                            <div style="margin-bottom: 6px;"><strong>❓ למה:</strong> ${rec.why}</div>
+                                            <div style="margin-bottom: 6px;"><strong>📈 השפעה:</strong> ${rec.impact}</div>
+                                            <div><strong>⏱ זמן:</strong> ${rec.time}</div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
                         </div>
                         ` : ''}
                     </div>
