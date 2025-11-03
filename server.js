@@ -817,28 +817,26 @@ app.post('/api/analyze', async (req, res) => {
         analysis.scores.socialScore = finalScore.socialScore;
         analysis.scores.mentionsScore = finalScore.mentionsScore;
 
-        // GPT-powered intelligent analysis
-        if (openai) {
-            console.log('🤖 מפעיל ניתוח חכם עם GPT...');
+        // Rule-based intelligent analysis
+        console.log('🤖 מפעיל ניתוח חכם...');
 
-            // Analyze page content quality
-            const contentAnalysis = await analyzeContentWithGPT(data, analysis.fontName);
-            analysis.gptContentAnalysis = contentAnalysis;
+        // Analyze page content quality
+        const contentAnalysis = analyzeContentWithGPT(data, analysis.fontName);
+        analysis.contentAnalysis = contentAnalysis;
 
-            // Analyze sentiment of social mentions
-            const allSources = [
-                ...(socialMedia.sources || []),
-                ...(googleRanking.sources || [])
-            ];
-            const sentimentAnalysis = await analyzeMentionsSentiment(allSources, analysis.fontName);
-            analysis.gptSentiment = sentimentAnalysis;
+        // Analyze sentiment of social mentions
+        const allSources = [
+            ...(socialMedia.sources || []),
+            ...(googleRanking.sources || [])
+        ];
+        const sentimentAnalysis = analyzeMentionsSentiment(allSources, analysis.fontName);
+        analysis.sentimentAnalysis = sentimentAnalysis;
 
-            // Generate overall summary and recommendations
-            const summary = await generateSummaryAndRecommendations(analysis, analysis.fontName);
-            analysis.gptSummary = summary;
+        // Generate overall summary and recommendations
+        const aiSummary = generateSummaryAndRecommendations(analysis, analysis.fontName);
+        analysis.aiSummary = aiSummary;
 
-            console.log('✅ ניתוח חכם הושלם');
-        }
+        console.log('✅ ניתוח חכם הושלם');
 
         console.log('✅ הושלם בהצלחה');
 
