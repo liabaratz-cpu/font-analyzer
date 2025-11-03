@@ -229,33 +229,18 @@ async function searchSocialMediaMentions(fontName) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top 10 sources from each platform, but only if they actually mention the font name
+                    // Add top 10 sources from each platform
+                    // Since the query already includes "פונט [name]", results are pre-filtered
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
-                            // Check if font name appears in title or snippet (case insensitive)
                             const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Only add if BOTH the font name AND a font-related keyword appear together
+                            // Basic check: font name should appear in the result
                             const hasFontName = combinedText.includes(fontNameLower);
-                            const hasFontKeyword = /(\bפונט\b|\bfont\b|\bגופן\b)/.test(combinedText);
 
-                            // Also check that they appear close to each other (within 50 characters)
-                            let isRelevant = false;
-                            if (hasFontName && hasFontKeyword) {
-                                const fontNameIndex = combinedText.indexOf(fontNameLower);
-                                const fontKeywordMatches = combinedText.match(/(\bפונט\b|\bfont\b|\bגופן\b)/g);
-                                if (fontKeywordMatches) {
-                                    // Check if any font keyword is within 50 chars of font name
-                                    isRelevant = fontKeywordMatches.some(keyword => {
-                                        const keywordIndex = combinedText.indexOf(keyword);
-                                        return Math.abs(keywordIndex - fontNameIndex) < 50;
-                                    });
-                                }
-                            }
-
-                            if (isRelevant) {
+                            if (hasFontName) {
                                 results.sources.push({
                                     platform: platform.name,
                                     title: result.title,
@@ -377,6 +362,61 @@ function analyzeSEO(pageData, url) {
 
     seo.score = Math.min(100, score);
     return seo;
+}
+
+// Generate visual description of the font from screenshot
+async function generateFontDescription(screenshotBase64, fontName, pageData) {
+    if (!openai || !screenshotBase64) {
+        return {
+            enabled: false,
+            description: null
+        };
+    }
+
+    try {
+        const title = pageData.title || '';
+        const description = pageData.description || '';
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{
+                role: 'user',
+                content: [
+                    {
+                        type: 'text',
+                        text: `תאר את הפונט "${fontName}" על בסיס הדף הזה. כתוב 2-3 משפטים קצרים בעברית שמתארים:
+1. איך הפונט נראה (מודרני/מסורתי/קליגרפי/גיאומטרי/וכו')
+2. מה האופי והתחושה שלו (אלגנטי/חזק/עדין/משחקי/וכו')
+3. לאילו שימושים הוא מתאים
+
+כותרת: ${title}
+תיאור: ${description}
+
+תן תשובה קצרה וממוקדת בעברית.`
+                    },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: `data:image/png;base64,${screenshotBase64}`
+                        }
+                    }
+                ]
+            }],
+            max_tokens: 200,
+            temperature: 0.7
+        });
+
+        return {
+            enabled: true,
+            description: response.choices[0].message.content.trim()
+        };
+    } catch (error) {
+        console.error('Font description error:', error.message);
+        return {
+            enabled: false,
+            description: null
+        };
+    }
 }
 
 // Smart content analysis based on page data
