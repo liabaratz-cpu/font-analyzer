@@ -830,8 +830,8 @@
                         </div>
                     </div>
                     ${data.socialMedia.sources && data.socialMedia.sources.length > 0 ? `
-                    <div style="margin-top: 20px;">
-                        <h4 style="margin-bottom: 15px; color: #333;">Top Social Sources:</h4>
+                    <div style="margin-top: 20px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1em;">🔗 Top Social Sources (${data.socialMedia.sources.length}):</h4>
                         ${data.socialMedia.sources.map(source => `
                             <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0;">
                                 <span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase;">${source.platform}</span>
