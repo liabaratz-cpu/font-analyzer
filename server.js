@@ -229,18 +229,28 @@ async function searchSocialMediaMentions(fontName) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top 10 sources from each platform
-                    // Since the query already includes "פונט [name]", results are pre-filtered
+                    // Add top 10 sources from each platform with strict filtering
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
                             const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Basic check: font name should appear in the result
+                            // Check if font name appears in the result
                             const hasFontName = combinedText.includes(fontNameLower);
 
-                            if (hasFontName) {
+                            // Check if font-related keywords appear
+                            const hasFontKeyword = /(\bפונט\b|\bfont\b|\bגופן\b|\bטיפוגרפיה\b|\btypography\b|\bאותיות\b)/i.test(combinedText);
+
+                            // Also exclude common false positives
+                            const isFalsePositive =
+                                combinedText.includes('בת קול') ||  // Common phrase unrelated to fonts
+                                combinedText.includes('הילה') ||     // Names that might appear
+                                (combinedText.includes('סגולה') && !hasFontKeyword) ||  // "סגולה" as virtue/charm without font context
+                                (combinedText.includes('שחר') && !hasFontKeyword && !combinedText.includes('הדר'));  // Just "שחר" without "הדר"
+
+                            // Only add if it has font name AND font keyword AND is not false positive
+                            if (hasFontName && hasFontKeyword && !isFalsePositive) {
                                 results.sources.push({
                                     platform: platform.name,
                                     title: result.title,
