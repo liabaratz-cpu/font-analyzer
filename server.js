@@ -241,8 +241,8 @@ async function searchSocialMediaMentions(fontName) {
                             const hasFontName = combinedText.includes(fontNameLower);
                             if (!hasFontName) return; // Skip if no font name at all
 
-                            // Check if font-related keywords appear
-                            const hasFontKeyword = /(\bפונט\b|\bfont\b|\bגופן\b|\bטיפוגרפיה\b|\btypography\b|\bאותיות\b|\bעיצוב\b|\bdesign\b)/i.test(combinedText);
+                            // Check if font-related keywords appear (no word boundaries for Hebrew)
+                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|אותיות|עיצוב|design)/i.test(combinedText);
 
                             // Check if it's from a trusted font-related domain
                             const isTrustedDomain =
