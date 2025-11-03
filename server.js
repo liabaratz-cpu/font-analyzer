@@ -33,7 +33,13 @@ app.get('/', (req, res) => {
         message: 'Font Analyzer API is running',
         version: '2.1.0',
         features: {
-            webSearch: !!SERPAPI_KEY
+            webSearch: !!SERPAPI_KEY,
+            gptAnalysis: !!openai
+        },
+        debug: {
+            openaiKeyPresent: !!OPENAI_API_KEY,
+            openaiKeyLength: OPENAI_API_KEY.length,
+            openaiClientInitialized: !!openai
         }
     });
 });
