@@ -379,175 +379,258 @@ function analyzeSEO(pageData, url) {
     return seo;
 }
 
-// GPT-powered content analysis
-async function analyzeContentWithGPT(pageData, fontName) {
-    if (!openai) {
-        return {
-            enabled: false,
-            message: 'GPT analysis not configured'
-        };
+// Smart content analysis based on page data
+function analyzeContentWithGPT(pageData, fontName) {
+    const title = pageData.title || '';
+    const description = pageData.description || pageData.metaDesc || '';
+    const h1 = pageData.h1 || '';
+    const bodyText = pageData.bodyText || '';
+    const contentLength = bodyText.length;
+
+    // Calculate content score (1-10)
+    let contentScore = 5;
+    if (contentLength > 1000) contentScore += 2;
+    if (contentLength > 500) contentScore += 1;
+    if (description.length > 100) contentScore += 1;
+    if (h1 && h1.includes(fontName)) contentScore += 1;
+    contentScore = Math.min(10, contentScore);
+
+    // Calculate marketing score (1-10)
+    let marketingScore = 5;
+    if (title.length >= 30 && title.length <= 60) marketingScore += 2;
+    if (description.length >= 120) marketingScore += 1;
+    if (bodyText.includes('ייחוד') || bodyText.includes('מיוחד') || bodyText.includes('אופי')) marketingScore += 1;
+    if (pageData.ogTitle || pageData.ogDesc) marketingScore += 1;
+    marketingScore = Math.min(10, marketingScore);
+
+    // Identify strengths
+    const strengths = [];
+    if (contentLength > 800) {
+        strengths.push('תיאור מפורט ואינפורמטיבי של הפונט');
+    }
+    if (pageData.hasHttps) {
+        strengths.push('אתר מאובטח עם HTTPS');
+    }
+    if (pageData.ogTitle && pageData.ogDesc) {
+        strengths.push('אופטימיזציה טובה לשיתוף ברשתות חברתיות');
+    }
+    if (h1 && description) {
+        strengths.push('מבנה עמוד ברור עם כותרת ותיאור');
     }
 
-    try {
-        const prompt = `You are analyzing a font page for "${fontName}".
-
-Page content:
-Title: ${pageData.title}
-Description: ${pageData.description || pageData.metaDesc || 'No description'}
-H1: ${pageData.h1}
-Content snippet: ${pageData.bodyText?.substring(0, 500) || 'No content'}
-
-Please analyze in Hebrew and provide:
-1. Content Quality Score (1-10): How well is the font described?
-2. Marketing Effectiveness (1-10): Is the text compelling and professional?
-3. Key Strengths: What works well (2-3 points)
-4. Improvement Suggestions: What should be improved (2-3 actionable items)
-
-Respond in JSON format:
-{
-  "contentScore": number,
-  "marketingScore": number,
-  "strengths": ["point1", "point2"],
-  "improvements": ["suggestion1", "suggestion2"]
-}`;
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            temperature: 0.7
-        });
-
-        const analysis = JSON.parse(response.choices[0].message.content);
-
-        return {
-            enabled: true,
-            ...analysis
-        };
-    } catch (error) {
-        console.error('GPT content analysis error:', error.message);
-        return {
-            enabled: false,
-            error: 'Failed to analyze content',
-            errorMessage: error.message
-        };
+    // If we have few strengths, add generic positive notes
+    if (strengths.length < 2) {
+        strengths.push('העמוד מכיל מידע בסיסי על הפונט');
+        strengths.push('הפונט מוצג באופן ברור');
     }
+
+    // Identify improvements
+    const improvements = [];
+    if (contentLength < 500) {
+        improvements.push('הרחיבו את תיאור הפונט - הוסיפו סיפור, דוגמאות שימוש, ומקרים שבהם הפונט מתאים');
+    }
+    if (!description || description.length < 100) {
+        improvements.push('הוסיפו תיאור מפורט ב-meta description לשיפור SEO');
+    }
+    if (!pageData.ogTitle || !pageData.ogDesc) {
+        improvements.push('הוסיפו Open Graph tags לשיתוף מושלם ברשתות חברתיות');
+    }
+    if (title.length < 30) {
+        improvements.push('הרחיבו את כותרת העמוד כך שתכלול מילות מפתח רלוונטיות');
+    }
+    if (!bodyText.includes('דוגמ') && !bodyText.includes('example')) {
+        improvements.push('הוסיפו דוגמאות שימוש ומקרי מבחן לפונט');
+    }
+
+    // Take top 2-3
+    const topStrengths = strengths.slice(0, 3);
+    const topImprovements = improvements.slice(0, 3);
+
+    return {
+        enabled: true,
+        contentScore: contentScore,
+        marketingScore: marketingScore,
+        strengths: topStrengths,
+        improvements: topImprovements,
+        method: 'rule-based'
+    };
 }
 
-// GPT-powered sentiment analysis of mentions
-async function analyzeMentionsSentiment(sources, fontName) {
-    if (!openai || !sources || sources.length === 0) {
+// Smart sentiment analysis of mentions using keyword detection
+function analyzeMentionsSentiment(sources, fontName) {
+    if (!sources || sources.length === 0) {
         return {
-            enabled: false,
+            enabled: true,
             positive: 0,
             neutral: 0,
             negative: 0,
-            highlights: []
+            highlights: ['לא נמצאו איזכורים לניתוח'],
+            method: 'rule-based'
         };
     }
 
-    try {
-        const mentionsText = sources.slice(0, 10).map((s, i) =>
-            `${i + 1}. ${s.title} - ${s.snippet}`
-        ).join('\n');
+    // Positive keywords in Hebrew and English
+    const positiveKeywords = [
+        'מדהים', 'נהדר', 'מעולה', 'יפה', 'מושלם', 'איכותי', 'מומלץ', 'ממליצ',
+        'אוהב', 'אהבת', 'מעוצב', 'ייחודי', 'מיוחד', 'מרשים', 'professional',
+        'beautiful', 'amazing', 'excellent', 'love', 'perfect', 'great', 'wonderful',
+        'stunning', 'gorgeous', 'recommend', 'best', 'favorite', 'quality'
+    ];
 
-        const prompt = `Analyze sentiment of these mentions for font "${fontName}":
+    // Negative keywords in Hebrew and English
+    const negativeKeywords = [
+        'גרוע', 'רע', 'לא טוב', 'בעיה', 'באג', 'שגיאה', 'לא עובד', 'קשה',
+        'מסובך', 'לא ברור', 'bad', 'poor', 'terrible', 'awful', 'problem',
+        'issue', 'broken', 'difficult', 'confusing', 'disappointing'
+    ];
 
-${mentionsText}
+    let positive = 0;
+    let neutral = 0;
+    let negative = 0;
+    const highlights = [];
 
-Count how many are:
-- Positive (praising, recommending, positive usage)
-- Neutral (just mentioning, factual)
-- Negative (criticism, complaints)
+    // Analyze each source
+    sources.slice(0, 10).forEach(source => {
+        const text = `${source.title || ''} ${source.snippet || ''}`.toLowerCase();
 
-Also extract 2-3 most interesting/important highlights in Hebrew.
+        // Count positive and negative keyword matches
+        let positiveCount = 0;
+        let negativeCount = 0;
 
-Respond in JSON:
-{
-  "positive": number,
-  "neutral": number,
-  "negative": number,
-  "highlights": ["highlight1", "highlight2"]
-}`;
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            temperature: 0.5
+        positiveKeywords.forEach(keyword => {
+            if (text.includes(keyword.toLowerCase())) positiveCount++;
         });
 
-        const sentiment = JSON.parse(response.choices[0].message.content);
+        negativeKeywords.forEach(keyword => {
+            if (text.includes(keyword.toLowerCase())) negativeCount++;
+        });
 
-        return {
-            enabled: true,
-            ...sentiment
-        };
-    } catch (error) {
-        console.error('GPT sentiment analysis error:', error.message);
-        return {
-            enabled: false,
-            positive: 0,
-            neutral: 0,
-            negative: 0,
-            highlights: [],
-            errorMessage: error.message
-        };
+        // Classify based on keyword counts
+        if (positiveCount > negativeCount && positiveCount > 0) {
+            positive++;
+            // Add as highlight if very positive
+            if (positiveCount >= 2 && highlights.length < 3) {
+                highlights.push(source.title || source.snippet?.substring(0, 100));
+            }
+        } else if (negativeCount > positiveCount && negativeCount > 0) {
+            negative++;
+        } else {
+            neutral++;
+            // Add popular neutral mentions as highlights
+            if (highlights.length < 3 && (source.platform === 'instagram' || source.platform === 'behance')) {
+                highlights.push(source.title || source.snippet?.substring(0, 100));
+            }
+        }
+    });
+
+    // If no highlights found, add the first few source titles
+    if (highlights.length === 0 && sources.length > 0) {
+        sources.slice(0, 3).forEach(s => {
+            if (s.title) highlights.push(s.title);
+        });
     }
+
+    // Limit to 3 highlights
+    const finalHighlights = highlights.slice(0, 3);
+
+    return {
+        enabled: true,
+        positive: positive,
+        neutral: neutral,
+        negative: negative,
+        highlights: finalHighlights.length > 0 ? finalHighlights : ['נמצאו איזכורים של הפונט ברשת'],
+        method: 'rule-based'
+    };
 }
 
-// GPT-powered overall summary and recommendations
-async function generateSummaryAndRecommendations(allData, fontName) {
-    if (!openai) {
-        return {
-            enabled: false
-        };
+// Smart summary and recommendations based on data analysis
+function generateSummaryAndRecommendations(allData, fontName) {
+    const seoScore = allData.scores?.seoScore || 0;
+    const rankingScore = allData.scores?.rankingScore || 0;
+    const socialScore = allData.scores?.socialScore || 0;
+    const finalScore = allData.scores?.final || 0;
+    const pageRank = allData.googleRanking?.pageRank;
+    const totalMentions = allData.socialMedia?.total || 0;
+    const backlinks = allData.backlinks?.totalBacklinks || 0;
+
+    // Determine priority
+    let priority = 'medium';
+    if (finalScore < 30) priority = 'high';
+    else if (finalScore > 70) priority = 'low';
+
+    // Build summary
+    let summary = '';
+    if (finalScore >= 70) {
+        summary = `הפונט "${fontName}" נמצא במצב חשיפה מצוין! הציון הכולל ${finalScore}/100 מעיד על נוכחות דיגיטלית חזקה. `;
+    } else if (finalScore >= 40) {
+        summary = `הפונט "${fontName}" נמצא במצב חשיפה סביר עם ציון ${finalScore}/100. יש פוטנציאל משמעותי לשיפור. `;
+    } else {
+        summary = `הפונט "${fontName}" זקוק לשיפור משמעותי בחשיפה (ציון: ${finalScore}/100). `;
     }
 
-    try {
-        const prompt = `You are analyzing overall exposure for font "${fontName}".
-
-Stats:
-- SEO Score: ${allData.scores?.seoScore || 0}/100
-- Google Ranking: ${allData.googleRanking?.pageRank ? `#${allData.googleRanking.pageRank}` : 'Not in top 100'}
-- Total Social Mentions: ${allData.socialMedia?.total || 0}
-- Facebook: ${allData.socialMedia?.facebook || 0}
-- Instagram: ${allData.socialMedia?.instagram || 0}
-- Twitter: ${allData.socialMedia?.twitter || 0}
-- Backlinks: ${allData.backlinks?.totalBacklinks || 0}
-
-Provide in Hebrew:
-1. Brief Summary (2-3 sentences): Overall exposure status
-2. Top 3 Recommendations: Specific, actionable advice to improve exposure
-3. Priority Level: "high" (needs urgent work), "medium" (doing okay), or "low" (excellent)
-
-Respond in JSON:
-{
-  "summary": "text",
-  "recommendations": ["rec1", "rec2", "rec3"],
-  "priority": "high|medium|low"
-}`;
-
-        const response = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            temperature: 0.7
-        });
-
-        const result = JSON.parse(response.choices[0].message.content);
-
-        return {
-            enabled: true,
-            ...result
-        };
-    } catch (error) {
-        console.error('GPT summary error:', error.message);
-        return {
-            enabled: false,
-            errorMessage: error.message
-        };
+    // Add specific insights
+    if (pageRank) {
+        summary += `הפונט מדורג במקום #${pageRank} בגוגל. `;
+    } else {
+        summary += `הפונט לא מופיע ב-100 התוצאות הראשונות בגוגל. `;
     }
+
+    if (totalMentions > 0) {
+        summary += `נמצאו ${totalMentions} איזכורים ברשתות חברתיות.`;
+    } else {
+        summary += `לא נמצאו איזכורים ברשתות חברתיות.`;
+    }
+
+    // Build recommendations
+    const recommendations = [];
+
+    // SEO recommendations
+    if (seoScore < 60) {
+        recommendations.push('שפרו את ה-SEO של העמוד: הוסיפו תיאור מפורט, כותרות ברורות, ו-meta tags מלאים');
+    }
+
+    // Ranking recommendations
+    if (!pageRank || pageRank > 10) {
+        recommendations.push('שפרו את הדירוג בגוגל: הוסיפו תוכן איכותי, מילות מפתח רלוונטיות, וקישורים פנימיים');
+    }
+
+    // Social media recommendations
+    if (totalMentions < 5) {
+        recommendations.push('הגבירו נוכחות ברשתות חברתיות: פרסמו דוגמאות שימוש, שתפו בקבוצות עיצוב, והדגישו תכונות ייחודיות');
+    } else if (allData.socialMedia?.instagram < 2) {
+        recommendations.push('פרסמו יותר באינסטגרם - זוהי פלטפורמה מרכזית למעצבים');
+    }
+
+    // Backlinks recommendations
+    if (backlinks < 3) {
+        recommendations.push('השיגו קישורים חיצוניים: פרסמו מאמרים, השתתפו בפורומים, ושתפו פעולה עם מעצבים');
+    }
+
+    // Content recommendations
+    if (allData.contentLength < 500) {
+        recommendations.push('הרחיבו את תיאור הפונט: הוסיפו סיפור, דוגמאות שימוש, והמלצות למתי להשתמש בפונט');
+    }
+
+    // If we have too few recommendations, add general ones
+    if (recommendations.length < 3) {
+        if (!recommendations.some(r => r.includes('תמונות'))) {
+            recommendations.push('הוסיפו דוגמאות חזותיות איכותיות של הפונט בשימוש');
+        }
+        if (!recommendations.some(r => r.includes('וידאו'))) {
+            recommendations.push('שקלו ליצור וידאו קצר המציג את הפונט');
+        }
+    }
+
+    // Take top 3
+    const topRecommendations = recommendations.slice(0, 3);
+
+    return {
+        enabled: true,
+        summary: summary.trim(),
+        recommendations: topRecommendations,
+        priority: priority,
+        method: 'rule-based'  // Indicate this is not GPT
+    };
 }
 
 // Calculate final exposure score based on all metrics
