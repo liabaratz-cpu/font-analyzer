@@ -18,6 +18,12 @@ const SERPAPI_KEY = 'edaaa52ea05a7a56ae62ae73bdb8c9cf56f3f2bfae28c5cb934503ac58c
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
+// Log OpenAI status on startup
+console.log('🤖 OpenAI Status:');
+console.log('  API Key present:', !!OPENAI_API_KEY);
+console.log('  API Key length:', OPENAI_API_KEY.length);
+console.log('  OpenAI client:', openai ? 'Initialized' : 'Not initialized');
+
 app.use(cors());
 app.use(express.json());
 
