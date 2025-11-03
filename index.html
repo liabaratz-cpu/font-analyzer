@@ -860,21 +860,21 @@
                 </div>
                 ` : ''}
 
-                <!-- GPT Intelligence Analysis -->
-                ${data.gptSummary && data.gptSummary.enabled ? `
+                <!-- AI Intelligence Analysis -->
+                ${data.aiSummary && data.aiSummary.enabled ? `
                 <div class="info-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <div class="info-title" style="color: white;">🤖 AI Smart Analysis</div>
                     <div style="font-size: 0.95em; line-height: 1.8;">
                         <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <strong style="display: block; margin-bottom: 8px;">📝 Summary:</strong>
-                            <p style="margin: 0; line-height: 1.6;">${data.gptSummary.summary}</p>
+                            <p style="margin: 0; line-height: 1.6;">${data.aiSummary.summary}</p>
                         </div>
 
-                        ${data.gptSummary.recommendations && data.gptSummary.recommendations.length > 0 ? `
+                        ${data.aiSummary.recommendations && data.aiSummary.recommendations.length > 0 ? `
                         <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
                             <strong style="display: block; margin-bottom: 12px;">💡 Recommendations:</strong>
                             <ol style="margin: 0; padding-right: 20px; line-height: 1.8;">
-                                ${data.gptSummary.recommendations.map(rec => `<li style="margin-bottom: 8px;">${rec}</li>`).join('')}
+                                ${data.aiSummary.recommendations.map(rec => `<li style="margin-bottom: 8px;">${rec}</li>`).join('')}
                             </ol>
                         </div>
                         ` : ''}
@@ -883,35 +883,35 @@
                 ` : ''}
 
                 <!-- Content Quality Analysis -->
-                ${data.gptContentAnalysis && data.gptContentAnalysis.enabled ? `
+                ${data.contentAnalysis && data.contentAnalysis.enabled ? `
                 <div class="info-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
                     <div class="info-title" style="color: white;">📄 Content Quality Analysis</div>
                     <div style="font-size: 0.95em; line-height: 1.6;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold;">${data.gptContentAnalysis.contentScore}/10</div>
+                                <div style="font-size: 2em; font-weight: bold;">${data.contentAnalysis.contentScore}/10</div>
                                 <div style="opacity: 0.9; margin-top: 5px;">Content Quality</div>
                             </div>
                             <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold;">${data.gptContentAnalysis.marketingScore}/10</div>
+                                <div style="font-size: 2em; font-weight: bold;">${data.contentAnalysis.marketingScore}/10</div>
                                 <div style="opacity: 0.9; margin-top: 5px;">Marketing</div>
                             </div>
                         </div>
 
-                        ${data.gptContentAnalysis.strengths && data.gptContentAnalysis.strengths.length > 0 ? `
+                        ${data.contentAnalysis.strengths && data.contentAnalysis.strengths.length > 0 ? `
                         <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
                             <strong>✅ Strengths:</strong>
                             <ul style="margin: 8px 0 0; padding-right: 20px;">
-                                ${data.gptContentAnalysis.strengths.map(s => `<li>${s}</li>`).join('')}
+                                ${data.contentAnalysis.strengths.map(s => `<li>${s}</li>`).join('')}
                             </ul>
                         </div>
                         ` : ''}
 
-                        ${data.gptContentAnalysis.improvements && data.gptContentAnalysis.improvements.length > 0 ? `
+                        ${data.contentAnalysis.improvements && data.contentAnalysis.improvements.length > 0 ? `
                         <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px;">
                             <strong>🔧 Improvements:</strong>
                             <ul style="margin: 8px 0 0; padding-right: 20px;">
-                                ${data.gptContentAnalysis.improvements.map(i => `<li>${i}</li>`).join('')}
+                                ${data.contentAnalysis.improvements.map(i => `<li>${i}</li>`).join('')}
                             </ul>
                         </div>
                         ` : ''}
@@ -920,30 +920,30 @@
                 ` : ''}
 
                 <!-- Sentiment Analysis -->
-                ${data.gptSentiment && data.gptSentiment.enabled ? `
+                ${data.sentimentAnalysis && data.sentimentAnalysis.enabled ? `
                 <div class="info-section" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
                     <div class="info-title">😊 Mentions Sentiment</div>
                     <div style="font-size: 0.95em; line-height: 1.6;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                             <div style="background: rgba(76, 175, 80, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #4CAF50;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #2e7d32;">${data.gptSentiment.positive}</div>
+                                <div style="font-size: 1.8em; font-weight: bold; color: #2e7d32;">${data.sentimentAnalysis.positive}</div>
                                 <div style="color: #2e7d32; margin-top: 5px;">Positive</div>
                             </div>
                             <div style="background: rgba(158, 158, 158, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #9E9E9E;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #616161;">${data.gptSentiment.neutral}</div>
+                                <div style="font-size: 1.8em; font-weight: bold; color: #616161;">${data.sentimentAnalysis.neutral}</div>
                                 <div style="color: #616161; margin-top: 5px;">Neutral</div>
                             </div>
                             <div style="background: rgba(244, 67, 54, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #F44336;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #c62828;">${data.gptSentiment.negative}</div>
+                                <div style="font-size: 1.8em; font-weight: bold; color: #c62828;">${data.sentimentAnalysis.negative}</div>
                                 <div style="color: #c62828; margin-top: 5px;">Negative</div>
                             </div>
                         </div>
 
-                        ${data.gptSentiment.highlights && data.gptSentiment.highlights.length > 0 ? `
+                        ${data.sentimentAnalysis.highlights && data.sentimentAnalysis.highlights.length > 0 ? `
                         <div style="background: white; padding: 12px; border-radius: 8px;">
                             <strong style="color: #333;">🌟 Highlights:</strong>
                             <ul style="margin: 8px 0 0; padding-right: 20px; color: #555;">
-                                ${data.gptSentiment.highlights.map(h => `<li style="margin-bottom: 5px;">${h}</li>`).join('')}
+                                ${data.sentimentAnalysis.highlights.map(h => `<li style="margin-bottom: 5px;">${h}</li>`).join('')}
                             </ul>
                         </div>
                         ` : ''}
