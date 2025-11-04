@@ -252,11 +252,16 @@ async function searchSocialMediaMentions(fontName) {
                                 url.includes('myfonts') ||
                                 url.includes('fonts.google');
 
+                            // Check if this is from the designer's own account (not just tagged)
+                            const isOwnPost = url.includes('instagram.com/lia_baratz/') ||
+                                              url.includes('instagram.com/p/') && combinedText.startsWith('lia baratz');
+
                             // Known false positive patterns
                             const isFalsePositive =
                                 (combinedText.includes('בת קול') && !hasFontKeyword) ||  // Common phrase
                                 (combinedText.includes('סגולה') && !hasFontKeyword && !isTrustedDomain &&
-                                 (combinedText.includes('תפילה') || combinedText.includes('קמע') || combinedText.includes('ברכה')));  // Religious/charm context
+                                 (combinedText.includes('תפילה') || combinedText.includes('קמע') || combinedText.includes('ברכה'))) ||  // Religious/charm context
+                                isOwnPost;  // Filter out designer's own posts
 
                             // Accept if: (has font keyword) OR (trusted domain) AND (not false positive)
                             const isRelevant = (hasFontKeyword || isTrustedDomain) && !isFalsePositive;
