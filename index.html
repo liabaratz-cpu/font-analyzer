@@ -829,20 +829,20 @@
                             <div class="detail-value">${data.socialMedia.reddit}</div>
                         </div>
                     </div>
+                    ${data.socialMedia.sources && data.socialMedia.sources.length > 0 ? `
                     <div style="margin-top: 20px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
-                        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1em;">🔗 ALL Social Sources (${data.socialMedia.sources ? data.socialMedia.sources.length : 0}):</h4>
-                        ${data.socialMedia.sources && data.socialMedia.sources.length > 0 ?
-                            data.socialMedia.sources.map(source => `
+                        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1em;">🔗 Top Social Sources (${data.socialMedia.sources.length}):</h4>
+                        ${data.socialMedia.sources.map(source => `
                             <div style="background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e0e0e0;">
                                 <span style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase;">${source.platform}</span>
                                 <a href="${source.url}" target="_blank" style="color: #0693e3; font-weight: 600; text-decoration: none; display: block; margin-top: 8px;">
                                     ${source.title}
                                 </a>
                                 <p style="color: #666; font-size: 0.9em; margin-top: 8px;">${source.snippet}</p>
-                                ${source.debug ? `<pre style="background: #f0f0f0; padding: 8px; font-size: 0.8em; margin-top: 8px; overflow-x: auto;">${JSON.stringify(source.debug, null, 2)}</pre>` : ''}
                             </div>
-                        `).join('') : '<p style="color: #999;">אין תוצאות מ-Google</p>'}
+                        `).join('')}
                     </div>
+                    ` : ''}
                 </div>
                 ` : ''}
 

@@ -237,16 +237,36 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Add ALL results without filtering for debugging
+                            // Basic filtering that works:
+                            // 1. Font name must appear
+                            if (!combinedText.includes(fontNameLower)) return;
+
+                            // 2. Must have font keyword
+                            if (!/(פונט|font|גופן|typeface|typography)/i.test(combinedText)) return;
+
+                            // 3. Extract designer domain from font URL
+                            let designerDomain = '';
+                            try {
+                                const urlObj = new URL(fontUrl);
+                                designerDomain = urlObj.hostname.replace('www.', '');
+                            } catch (e) {}
+
+                            // 4. Skip if from designer's own domain OR designer's own posts
+                            // Check for patterns that indicate this is the designer's announcement post
+                            const isDesignerPost =
+                                (designerDomain && url.includes(designerDomain)) ||
+                                combinedText.includes('פונט חדש!') ||
+                                combinedText.includes('יצא לי') ||
+                                combinedText.includes('נראה לי שהכי');
+
+                            if (isDesignerPost) return;
+
+                            // Add to results
                             results.sources.push({
                                 platform: platform.name,
                                 title: result.title,
                                 url: result.link,
-                                snippet: result.snippet || '',
-                                debug: {
-                                    combinedText: combinedText.substring(0, 200),
-                                    hasFontName: combinedText.includes(fontNameLower)
-                                }
+                                snippet: result.snippet || ''
                             });
                         });
                     }
