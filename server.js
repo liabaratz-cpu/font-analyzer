@@ -237,43 +237,19 @@ async function searchSocialMediaMentions(fontName) {
                             const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Check if font name appears in the result
+                            // Simple and effective filtering:
+                            // 1. Font name must appear
                             const hasFontName = combinedText.includes(fontNameLower);
-                            if (!hasFontName) return; // Skip if no font name at all
+                            if (!hasFontName) return;
 
-                            // Check if font-related keywords appear (no word boundaries for Hebrew)
-                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|typeface|letterform)/i.test(combinedText);
+                            // 2. Must have font-related keywords
+                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|typeface)/i.test(combinedText);
 
-                            // Generic check for trusted font-related domains
-                            const fontDomains = ['myfonts', 'fonts.google', 'fontspring', 'fontshop', 'fontfabric',
-                                               'typography.com', 'linotype', 'monotype', 'fontstand', 'youworkforthem',
-                                               'alefalefalef', 'fontef'];
-                            const isTrustedDomain = fontDomains.some(domain => url.includes(domain));
+                            // 3. Filter out obvious non-font contexts
+                            const nonFontContext = /(recipe|cooking|restaurant|menu|coffee shop|café|music|movie|book title|game|sport|politics|weather)/i.test(combinedText);
 
-                            // Extract domain from the font URL to identify designer's own posts
-                            const fontUrlDomain = new URL(fontUrl).hostname.replace('www.', '');
-                            const isOwnDomain = url.includes(fontUrlDomain);
-
-                            // Generic false positive patterns (not font-related context)
-                            const nonFontContext = /(recipe|cooking|food|restaurant|menu|drink|coffee|tea|music|movie|book|game|sport|politics|news|weather)/i.test(combinedText);
-
-                            // Check if the font name appears in a font-related context
-                            // Look for patterns like "Font Name font", "פונט Font Name", etc.
-                            const fontNamePattern = new RegExp(`(פונט\\s+${fontNameLower}|${fontNameLower}\\s+font|${fontNameLower}\\s+typeface|גופן\\s+${fontNameLower}|${fontNameLower}\\s+typography)`, 'i');
-                            const hasFontContext = fontNamePattern.test(combinedText);
-
-                            // Calculate relevance score
-                            let relevanceScore = 0;
-                            if (hasFontName) relevanceScore += 1;
-                            if (hasFontKeyword) relevanceScore += 2;
-                            if (hasFontContext) relevanceScore += 2;
-                            if (isTrustedDomain) relevanceScore += 2;
-                            if (nonFontContext) relevanceScore -= 5; // Strong penalty for non-font context
-                            if (isOwnDomain && !isTrustedDomain) relevanceScore -= 1; // Small penalty for own domain
-
-                            // Accept if: has font keyword OR (has font name + good context)
-                            // This means: minimum 2 points (font keyword alone) or 1+2 (font name + keyword)
-                            const isRelevant = relevanceScore >= 2 && !nonFontContext;
+                            // Accept if: has font name AND has font keyword AND NOT non-font context
+                            const isRelevant = hasFontName && hasFontKeyword && !nonFontContext;
 
                             if (isRelevant) {
                                 results.sources.push({
