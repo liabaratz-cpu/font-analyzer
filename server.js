@@ -242,54 +242,37 @@ async function searchSocialMediaMentions(fontName) {
                             if (!hasFontName) return; // Skip if no font name at all
 
                             // Check if font-related keywords appear (no word boundaries for Hebrew)
-                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|אותיות|עיצוב|design)/i.test(combinedText);
+                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|typeface|letterform)/i.test(combinedText);
 
-                            // Check if it's from a trusted font-related domain
-                            const isTrustedDomain =
-                                url.includes('liafonts.com') ||
-                                url.includes('alefalefalef.co.il') ||
-                                url.includes('fontfabric') ||
-                                url.includes('myfonts') ||
-                                url.includes('fonts.google');
+                            // Generic check for trusted font-related domains
+                            const fontDomains = ['myfonts', 'fonts.google', 'fontspring', 'fontshop', 'fontfabric',
+                                               'typography.com', 'linotype', 'monotype', 'fontstand', 'youworkforthem',
+                                               'alefalefalef', 'fontef'];
+                            const isTrustedDomain = fontDomains.some(domain => url.includes(domain));
 
-                            // Check if this is from the designer's own account (not just tagged)
-                            const isOwnPost = url.includes('instagram.com/lia_baratz/') ||
-                                              (url.includes('instagram.com/p/') && combinedText.startsWith('lia baratz')) ||
-                                              combinedText.includes('lia baratz on instagram');
+                            // Extract domain from the font URL to identify designer's own posts
+                            const fontUrlDomain = new URL(fontUrl).hostname.replace('www.', '');
+                            const isOwnDomain = url.includes(fontUrlDomain);
 
-                            // List of other font names from liafonts.com to detect cross-contamination
-                            const otherFontNames = [
-                                'אספרסו', 'espresso',
-                                'הינומה', 'hinuma',
-                                'סגולה', 'sgula',
-                                'מיה', 'mia',
-                                'שחר הדר', 'shahar hadar',
-                                'עדי', 'adi',
-                                'רננה', 'renana',
-                                'תמר', 'tamar',
-                                'נעמי', 'naomi'
-                            ];
+                            // Generic false positive patterns (not font-related context)
+                            const nonFontContext = /(recipe|cooking|food|restaurant|menu|drink|coffee|tea|music|movie|book|game|sport|politics|news|weather)/i.test(combinedText);
 
-                            // Check if result mentions OTHER fonts (cross-contamination)
-                            const mentionsOtherFont = otherFontNames.some(otherFont => {
-                                const otherFontLower = otherFont.toLowerCase();
-                                // Skip if it's the same font we're searching for
-                                if (otherFontLower === fontNameLower) return false;
-                                // Check if this other font is prominently mentioned
-                                return combinedText.includes(`פונט ${otherFontLower}`) ||
-                                       combinedText.includes(`${otherFontLower} font`);
-                            });
+                            // Check if the font name appears in a font-related context
+                            // Look for patterns like "Font Name font", "פונט Font Name", etc.
+                            const fontNamePattern = new RegExp(`(פונט\\s+${fontNameLower}|${fontNameLower}\\s+font|${fontNameLower}\\s+typeface|גופן\\s+${fontNameLower}|${fontNameLower}\\s+typography)`, 'i');
+                            const hasFontContext = fontNamePattern.test(combinedText);
 
-                            // Known false positive patterns
-                            const isFalsePositive =
-                                (combinedText.includes('בת קול') && !hasFontKeyword) ||  // Common phrase
-                                (combinedText.includes('סגולה') && !hasFontKeyword && !isTrustedDomain &&
-                                 (combinedText.includes('תפילה') || combinedText.includes('קמע') || combinedText.includes('ברכה'))) ||  // Religious/charm context
-                                isOwnPost ||  // Filter out designer's own posts
-                                mentionsOtherFont;  // Filter out posts primarily about other fonts
+                            // Calculate relevance score
+                            let relevanceScore = 0;
+                            if (hasFontName) relevanceScore += 1;
+                            if (hasFontKeyword) relevanceScore += 2;
+                            if (hasFontContext) relevanceScore += 3;
+                            if (isTrustedDomain) relevanceScore += 2;
+                            if (nonFontContext) relevanceScore -= 3;
+                            if (isOwnDomain) relevanceScore -= 2; // Reduce score for designer's own domain
 
-                            // Accept if: (has font keyword) OR (trusted domain) AND (not false positive)
-                            const isRelevant = (hasFontKeyword || isTrustedDomain) && !isFalsePositive;
+                            // Accept if relevance score is high enough
+                            const isRelevant = relevanceScore >= 3;
 
                             if (isRelevant) {
                                 results.sources.push({
