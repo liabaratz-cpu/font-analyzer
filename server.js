@@ -266,13 +266,14 @@ async function searchSocialMediaMentions(fontName) {
                             let relevanceScore = 0;
                             if (hasFontName) relevanceScore += 1;
                             if (hasFontKeyword) relevanceScore += 2;
-                            if (hasFontContext) relevanceScore += 3;
+                            if (hasFontContext) relevanceScore += 2;
                             if (isTrustedDomain) relevanceScore += 2;
-                            if (nonFontContext) relevanceScore -= 3;
-                            if (isOwnDomain) relevanceScore -= 2; // Reduce score for designer's own domain
+                            if (nonFontContext) relevanceScore -= 5; // Strong penalty for non-font context
+                            if (isOwnDomain && !isTrustedDomain) relevanceScore -= 1; // Small penalty for own domain
 
-                            // Accept if relevance score is high enough
-                            const isRelevant = relevanceScore >= 3;
+                            // Accept if: has font keyword OR (has font name + good context)
+                            // This means: minimum 2 points (font keyword alone) or 1+2 (font name + keyword)
+                            const isRelevant = relevanceScore >= 2 && !nonFontContext;
 
                             if (isRelevant) {
                                 results.sources.push({
