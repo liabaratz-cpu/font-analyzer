@@ -237,45 +237,17 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Simple and effective filtering:
-                            // 1. Font name must appear
-                            const hasFontName = combinedText.includes(fontNameLower);
-                            if (!hasFontName) return;
-
-                            // 2. Must have font-related keywords
-                            const hasFontKeyword = /(פונט|font|גופן|טיפוגרפיה|typography|typeface)/i.test(combinedText);
-
-                            // 3. Filter out obvious non-font contexts
-                            const nonFontContext = /(recipe|cooking|restaurant|menu|coffee shop|café|music|movie|book title|game|sport|politics|weather)/i.test(combinedText);
-
-                            // 4. CRITICAL: Filter out designer's own promotional posts
-                            // Extract domain from font URL to identify designer's domain
-                            let designerDomain = '';
-                            try {
-                                designerDomain = new URL(fontUrl).hostname.replace('www.', '');
-                            } catch (e) {}
-
-                            // Check if this is designer's own promotional post (announcement)
-                            const isPromotionalPost =
-                                (designerDomain && url.includes(designerDomain)) ||  // From designer's website
-                                combinedText.includes('פונט חדש') ||  // "New font" announcement
-                                combinedText.includes('נראה לי שהכי') ||  // Personal opinion from designer
-                                combinedText.includes('שיצא לי') ||  // "that I made/created"
-                                combinedText.includes('זמין באתר') ||  // "Available on website"
-                                (combinedText.includes('פונט עברי') && combinedText.includes('מעודן') && combinedText.includes('תנועה')) || // Original announcement text
-                                /^[a-z\s]+\|/i.test(result.title || '');  // Instagram format: "Name | text"
-
-                            // Accept if: has font name AND has font keyword AND NOT non-font context AND NOT promotional post
-                            const isRelevant = hasFontName && hasFontKeyword && !nonFontContext && !isPromotionalPost;
-
-                            if (isRelevant) {
-                                results.sources.push({
-                                    platform: platform.name,
-                                    title: result.title,
-                                    url: result.link,
-                                    snippet: result.snippet || ''
-                                });
-                            }
+                            // Add ALL results without filtering for debugging
+                            results.sources.push({
+                                platform: platform.name,
+                                title: result.title,
+                                url: result.link,
+                                snippet: result.snippet || '',
+                                debug: {
+                                    combinedText: combinedText.substring(0, 200),
+                                    hasFontName: combinedText.includes(fontNameLower)
+                                }
+                            });
                         });
                     }
                 }
