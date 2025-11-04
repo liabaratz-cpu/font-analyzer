@@ -251,23 +251,25 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                                 designerDomain = urlObj.hostname.replace('www.', '');
                             } catch (e) {}
 
-                            // 4. SIMPLE SOLUTION: Only accept posts that mention the font in a USING context
-                            // Skip designer's own announcement/promotional posts
+                            // 4. Filter out designer's own promotional posts ONLY
+                            // The key: keep posts where OTHER people mention the font, filter only designer's own posts
 
                             // If from designer's domain, skip
                             if (designerDomain && url.includes(designerDomain)) return;
 
-                            // If from Instagram AND mentions "Lia Baratz", skip (it's her post)
-                            if (url.includes('instagram.com') && /lia\s*baratz/i.test(combinedText)) return;
+                            // Extract username from Instagram URL if possible
+                            // Instagram URLs: instagram.com/USERNAME/ or instagram.com/p/POSTID/
+                            // We want to skip posts FROM the designer's account (liabaratz or lia_baratz)
+                            const isFromDesignerInstagram =
+                                url.includes('instagram.com/lia_baratz/') ||
+                                url.includes('instagram.com/liabaratz/');
 
-                            // If from Facebook AND mentions "Lia", skip
-                            if (url.includes('facebook.com') && combinedText.includes('lia')) return;
+                            // For Instagram posts: if title starts with designer's name, it's from their account
+                            const isDesignerInstagramPost =
+                                url.includes('instagram.com') &&
+                                (result.title || '').match(/^lia\s*baratz\s*[|•]/i);
 
-                            // Skip specific promotional patterns (these are universal, not person-specific)
-                            if (combinedText.includes('available now') ||
-                                combinedText.includes('now available') ||
-                                combinedText.includes('new font') ||
-                                combinedText.includes('just released')) return;
+                            if (isFromDesignerInstagram || isDesignerInstagramPost) return;
 
                             // Add to results
                             results.sources.push({
