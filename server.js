@@ -251,22 +251,23 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                                 designerDomain = urlObj.hostname.replace('www.', '');
                             } catch (e) {}
 
-                            // 4. Skip if from designer's own domain OR designer's own posts
-                            // Check for patterns that indicate this is the designer's announcement post
-                            const isDesignerPost =
-                                (designerDomain && url.includes(designerDomain)) ||
-                                combinedText.includes('פונט חדש') ||
-                                combinedText.includes('יצא לי') ||
-                                combinedText.includes('נראה לי שהכי') ||
-                                combinedText.includes('עברי מעודן') ||
-                                combinedText.includes('מתנופף ברגע') ||
-                                combinedText.includes('זמין באתר') ||
-                                combinedText.includes('שחר הדר') ||  // Another font name in same post
-                                combinedText.includes('עומדת במקום') ||
-                                combinedText.includes('חולתאהבהאני') ||
-                                /lia\s*baratz/i.test(result.title || '');  // Lia's name in title
+                            // 4. SIMPLE SOLUTION: Only accept posts that mention the font in a USING context
+                            // Skip designer's own announcement/promotional posts
 
-                            if (isDesignerPost) return;
+                            // If from designer's domain, skip
+                            if (designerDomain && url.includes(designerDomain)) return;
+
+                            // If from Instagram AND mentions "Lia Baratz", skip (it's her post)
+                            if (url.includes('instagram.com') && /lia\s*baratz/i.test(combinedText)) return;
+
+                            // If from Facebook AND mentions "Lia", skip
+                            if (url.includes('facebook.com') && combinedText.includes('lia')) return;
+
+                            // Skip specific promotional patterns (these are universal, not person-specific)
+                            if (combinedText.includes('available now') ||
+                                combinedText.includes('now available') ||
+                                combinedText.includes('new font') ||
+                                combinedText.includes('just released')) return;
 
                             // Add to results
                             results.sources.push({
