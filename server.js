@@ -238,11 +238,21 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const fontNameLower = fontName.toLowerCase();
 
                             // Basic filtering that works:
-                            // 1. Font name must appear
-                            if (!combinedText.includes(fontNameLower)) return;
+                            // 1. Font name must appear IN CONTEXT with font keyword
+                            const hasFontName = combinedText.includes(fontNameLower);
+                            const hasFontKeyword = /(פונט|font|גופן|typeface|typography)/i.test(combinedText);
 
-                            // 2. Must have font keyword
-                            if (!/(פונט|font|גופן|typeface|typography)/i.test(combinedText)) return;
+                            if (!hasFontName || !hasFontKeyword) return;
+
+                            // 2. Make sure this specific font is mentioned, not another font
+                            // Check if "font [fontname]" or "[fontname] font" appears
+                            const fontNameInContext = new RegExp(`(פונט\\s+${fontNameLower}|${fontNameLower}\\s+font|font\\s+${fontNameLower}|${fontNameLower}\\s+פונט)`, 'i');
+
+                            if (!fontNameInContext.test(combinedText)) {
+                                // Font name appears but not in context - might be wrong font
+                                // Skip this result
+                                return;
+                            }
 
                             // 3. Extract designer domain from font URL
                             let designerDomain = '';
