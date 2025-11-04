@@ -182,7 +182,7 @@ async function searchBacklinks(fontPageUrl) {
 }
 
 // Helper function to search social media mentions
-async function searchSocialMediaMentions(fontName) {
+async function searchSocialMediaMentions(fontName, fontUrl) {
     if (!SERPAPI_KEY) {
         return {
             twitter: 0,
@@ -248,8 +248,25 @@ async function searchSocialMediaMentions(fontName) {
                             // 3. Filter out obvious non-font contexts
                             const nonFontContext = /(recipe|cooking|restaurant|menu|coffee shop|café|music|movie|book title|game|sport|politics|weather)/i.test(combinedText);
 
-                            // Accept if: has font name AND has font keyword AND NOT non-font context
-                            const isRelevant = hasFontName && hasFontKeyword && !nonFontContext;
+                            // 4. CRITICAL: Filter out designer's own promotional posts
+                            // Extract domain from font URL to identify designer's domain
+                            let designerDomain = '';
+                            try {
+                                designerDomain = new URL(fontUrl).hostname.replace('www.', '');
+                            } catch (e) {}
+
+                            // Check if this is designer's own promotional post (announcement)
+                            const isPromotionalPost =
+                                (designerDomain && url.includes(designerDomain)) ||  // From designer's website
+                                combinedText.includes('פונט חדש') ||  // "New font" announcement
+                                combinedText.includes('נראה לי שהכי') ||  // Personal opinion from designer
+                                combinedText.includes('שיצא לי') ||  // "that I made/created"
+                                combinedText.includes('זמין באתר') ||  // "Available on website"
+                                (combinedText.includes('פונט עברי') && combinedText.includes('מעודן') && combinedText.includes('תנועה')) || // Original announcement text
+                                /^[a-z\s]+\|/i.test(result.title || '');  // Instagram format: "Name | text"
+
+                            // Accept if: has font name AND has font keyword AND NOT non-font context AND NOT promotional post
+                            const isRelevant = hasFontName && hasFontKeyword && !nonFontContext && !isPromotionalPost;
 
                             if (isRelevant) {
                                 results.sources.push({
@@ -980,7 +997,7 @@ app.post('/api/analyze', async (req, res) => {
 
         // Search for social media mentions
         console.log('🌐 מחפש אזכורים ברשתות חברתיות...');
-        const socialMedia = await searchSocialMediaMentions(analysis.fontName);
+        const socialMedia = await searchSocialMediaMentions(analysis.fontName, url);
         analysis.socialMedia = socialMedia;
 
         // Search for backlinks (pages linking to this font page)
