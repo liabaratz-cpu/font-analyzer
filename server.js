@@ -255,9 +255,16 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             // Check for patterns that indicate this is the designer's announcement post
                             const isDesignerPost =
                                 (designerDomain && url.includes(designerDomain)) ||
-                                combinedText.includes('פונט חדש!') ||
+                                combinedText.includes('פונט חדש') ||
                                 combinedText.includes('יצא לי') ||
-                                combinedText.includes('נראה לי שהכי');
+                                combinedText.includes('נראה לי שהכי') ||
+                                combinedText.includes('עברי מעודן') ||
+                                combinedText.includes('מתנופף ברגע') ||
+                                combinedText.includes('זמין באתר') ||
+                                combinedText.includes('שחר הדר') ||  // Another font name in same post
+                                combinedText.includes('עומדת במקום') ||
+                                combinedText.includes('חולתאהבהאני') ||
+                                /lia\s*baratz/i.test(result.title || '');  // Lia's name in title
 
                             if (isDesignerPost) return;
 
