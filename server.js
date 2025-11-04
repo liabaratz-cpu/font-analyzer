@@ -254,14 +254,39 @@ async function searchSocialMediaMentions(fontName) {
 
                             // Check if this is from the designer's own account (not just tagged)
                             const isOwnPost = url.includes('instagram.com/lia_baratz/') ||
-                                              url.includes('instagram.com/p/') && combinedText.startsWith('lia baratz');
+                                              (url.includes('instagram.com/p/') && combinedText.startsWith('lia baratz')) ||
+                                              combinedText.includes('lia baratz on instagram');
+
+                            // List of other font names from liafonts.com to detect cross-contamination
+                            const otherFontNames = [
+                                'אספרסו', 'espresso',
+                                'הינומה', 'hinuma',
+                                'סגולה', 'sgula',
+                                'מיה', 'mia',
+                                'שחר הדר', 'shahar hadar',
+                                'עדי', 'adi',
+                                'רננה', 'renana',
+                                'תמר', 'tamar',
+                                'נעמי', 'naomi'
+                            ];
+
+                            // Check if result mentions OTHER fonts (cross-contamination)
+                            const mentionsOtherFont = otherFontNames.some(otherFont => {
+                                const otherFontLower = otherFont.toLowerCase();
+                                // Skip if it's the same font we're searching for
+                                if (otherFontLower === fontNameLower) return false;
+                                // Check if this other font is prominently mentioned
+                                return combinedText.includes(`פונט ${otherFontLower}`) ||
+                                       combinedText.includes(`${otherFontLower} font`);
+                            });
 
                             // Known false positive patterns
                             const isFalsePositive =
                                 (combinedText.includes('בת קול') && !hasFontKeyword) ||  // Common phrase
                                 (combinedText.includes('סגולה') && !hasFontKeyword && !isTrustedDomain &&
                                  (combinedText.includes('תפילה') || combinedText.includes('קמע') || combinedText.includes('ברכה'))) ||  // Religious/charm context
-                                isOwnPost;  // Filter out designer's own posts
+                                isOwnPost ||  // Filter out designer's own posts
+                                mentionsOtherFont;  // Filter out posts primarily about other fonts
 
                             // Accept if: (has font keyword) OR (trusted domain) AND (not false positive)
                             const isRelevant = (hasFontKeyword || isTrustedDomain) && !isFalsePositive;
