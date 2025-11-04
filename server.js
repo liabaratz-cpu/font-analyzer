@@ -275,9 +275,12 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                                 url.includes('instagram.com/liabaratz/');
 
                             // For Instagram posts: if title starts with designer's name, it's from their account
+                            // ALSO: if snippet contains "lia_baratz's profile picture" it's from their Instagram
                             const isDesignerInstagramPost =
                                 url.includes('instagram.com') &&
-                                (result.title || '').match(/^lia\s*baratz\s*[|•]/i);
+                                ((result.title || '').match(/^lia\s*baratz\s*[|•]/i) ||
+                                 snippet.includes("lia_baratz's profile picture") ||
+                                 snippet.includes('lia_baratz\n'));
 
                             if (isFromDesignerInstagram || isDesignerInstagramPost) return;
 
