@@ -436,7 +436,7 @@
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p style="color: #333333; font-size: 1.1em; font-weight: 600;" id="loadingText">Analyzing page... Please wait</p>
-                <p style="color: #666666; font-size: 0.9em; margin-top: 10px;">⏱️ First scan takes 15-20 seconds (server waking up)</p>
+                <p style="color: #666666; font-size: 0.9em; margin-top: 10px;">⏱️ First scan may take 15-20 seconds</p>
             </div>
 
             <div class="results" id="results">
@@ -455,7 +455,7 @@
                 <canvas id="shareCanvas" width="1200" height="630" style="display: none;"></canvas>
 
                 <div class="info-section" id="fontInfoSection" style="display: none;">
-                    <div class="info-title">📊 פרטי הפונט</div>
+                    <div class="info-title">📊 Font Details</div>
                     <div class="info-row">
                         <span class="info-key">Font Name:</span>
                         <span class="info-value" id="fontName">-</span>
@@ -469,22 +469,22 @@
                         <span class="info-value" id="domain" style="direction: ltr; text-align: left;">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-key">אבטחת HTTPS:</span>
+                        <span class="info-key">HTTPS Security:</span>
                         <span class="info-value" id="https">-</span>
                     </div>
                 </div>
 
                 <div class="info-section" id="weightsSection" style="display: none;">
-                    <div class="info-title">⚖️ Weights וגרסאות</div>
+                    <div class="info-title">⚖️ Weights & Variants</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
-                        ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
+                        ⚠️ <strong>Note:</strong> Detection is based on text scanning. For accurate results, check the actual font file.
                     </div>
                     <div class="info-row">
-                        <span class="info-key">מספר Weights שזוהו:</span>
+                        <span class="info-key">Number of Weights Detected:</span>
                         <span class="info-value" id="weightsCount">-</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-key">תמיכה ב-Italic:</span>
+                        <span class="info-key">Italic Support:</span>
                         <span class="info-value" id="hasItalic">-</span>
                     </div>
                     <div id="weightsList" style="margin-top: 15px;"></div>
@@ -493,7 +493,7 @@
                 <div class="info-section" id="featuresSection" style="display: none;">
                     <div class="info-title">✨ Technical Features</div>
                     <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404;">
-                        ⚠️ <strong>שים לב:</strong> הזיהוי מבוסס על סריקת טקסט בדף. לתוצאות מדויקות, בדוק את קובץ הפונט בפועל.
+                        ⚠️ <strong>Note:</strong> Detection is based on text scanning. For accurate results, check the actual font file.
                     </div>
                     <div id="featuresList"></div>
                 </div>
@@ -501,7 +501,7 @@
                 <div class="info-section" id="mentionsSection" style="display: none;">
                     <div class="info-title">🌐 Web Mentions</div>
                     <div class="info-row">
-                        <span class="info-key">סה"כ אזכורים באינטרנט:</span>
+                        <span class="info-key">Total Web Mentions:</span>
                         <span class="info-value" id="mentionsCount" style="font-size: 1.3em; font-weight: 700; color: #667eea;">-</span>
                     </div>
                     <div id="mentionsStatus" style="margin-top: 10px; color: #999; font-size: 0.9em;"></div>
@@ -510,11 +510,11 @@
 
                 <div class="details-grid" id="scoresSection" style="display: none;">
                     <div class="detail-card">
-                        <div class="detail-label">איכות תוYes</div>
+                        <div class="detail-label">Content Quality</div>
                         <div class="detail-value" id="contentQuality">0</div>
                     </div>
                     <div class="detail-card">
-                        <div class="detail-label">ציון Weights</div>
+                        <div class="detail-label">Weights Score</div>
                         <div class="detail-value" id="weightsScore">0</div>
                     </div>
                     <div class="detail-card">
@@ -522,42 +522,42 @@
                         <div class="detail-value" id="technicalScore">0</div>
                     </div>
                     <div class="detail-card">
-                        <div class="detail-label">אופטימיזציה</div>
+                        <div class="detail-label">Optimization</div>
                         <div class="detail-value" id="optimizationScore">0</div>
                     </div>
                     <div class="detail-card" id="mentionsScoreCard" style="display: none;">
-                        <div class="detail-label">ציון אזכורים</div>
+                        <div class="detail-label">Mentions Score</div>
                         <div class="detail-value" id="mentionsScoreValue">0</div>
                     </div>
                 </div>
 
                 <!-- Score Explanation -->
-                <div class="info-section" id="scoreExplanation" style="display: none; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="info-section" id="scoreExplanation" style="display: none;">
                     <div class="info-title">📊 Score Explanation</div>
                     <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
                         <p style="margin-bottom: 15px;"><strong>The overall score is composed of 5 components:</strong></p>
                         <ul style="list-style: none; padding: 0;">
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>איכות תוYes (25%):</strong> Platform, תיאור, HTTPS, אורך תוYes
+                                <strong>Content Quality (25%):</strong> Platform, description, HTTPS, content length
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>Weights (30%):</strong> מספר Weights, Italic, מגוון רחב
+                                <strong>Weights (30%):</strong> Number of weights, Italic, variety
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>Technical Features (15%):</strong> OpenType, Variable Font, ליגטורות, Hebrew
+                                <strong>Technical Features (15%):</strong> OpenType, Variable Font, ligatures, Hebrew
                             </li>
                             <li style="padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                                <strong>אופטימיזציה (10%):</strong> HTTPS, תיאור טוב, Platform מוכרת
+                                <strong>Optimization (10%):</strong> HTTPS, good description, known platform
                             </li>
                             <li style="padding: 8px 0;">
-                                <strong>Web Mentions (20%):</strong> מספר תוצאות בגוגל, נוכחות ברשת
+                                <strong>Web Mentions (20%):</strong> Google results count, web presence
                             </li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- Improvement Tips -->
-                <div class="info-section" id="improvementTips" style="display: none; background: #fff9e6; border-right: 4px solid #ffd700;">
+                <div class="info-section" id="improvementTips" style="display: none; background: rgba(255, 249, 230, 0.7); backdrop-filter: blur(10px); border-left: 4px solid #ffd700;">
                     <div class="info-title">💡 Tips to Improve Score</div>
                     <div id="tipsContent" style="font-size: 0.95em; line-height: 1.6; color: #333;"></div>
                 </div>
@@ -580,7 +580,7 @@
                         </button>
                     </div>
                     <p style="font-size: 0.85em; color: #999; margin-top: 12px;">
-                        ✓ Supported ב: TTF, OTF, WOFF, WOFF2 | מקסימום 10MB
+                        ✓ Supported: TTF, OTF, WOFF, WOFF2 | Maximum 10MB
                     </p>
                 </div>
             </div>
@@ -670,9 +670,9 @@
             } catch (error) {
                 hideLoading();
                 if (error.name === 'AbortError') {
-                    showError('הסריקה ארכה יותר מדי. נסה שוב - לפעמים השרת לוקח זמן להתעורר.');
+                    showError('The scan took too long. Try again - sometimes the server takes time to wake up.');
                 } else {
-                    showError(`Error בסריקת הדף: ${error.message}`);
+                    showError(`Page scan error: ${error.message}`);
                 }
             }
         }
@@ -768,7 +768,7 @@
                 <!-- Font Visual Description -->
                 ${data.fontDescription && data.fontDescription.enabled ? `
                 <div class="info-section">
-                    <div class="info-title">✨ תיאור הפונט</div>
+                    <div class="info-title">✨ Font Description</div>
                     <p style="font-size: 1.05em; line-height: 1.7; margin: 0; color: #333;">
                         ${data.fontDescription.description}
                     </p>
@@ -912,16 +912,16 @@
 
                         ${data.aiSummary.recommendations && data.aiSummary.recommendations.length > 0 ? `
                         <div>
-                            <strong style="display: block; margin-bottom: 15px; font-size: 1.05em; color: #000;">💡 המלצות לפעולה:</strong>
+                            <strong style="display: block; margin-bottom: 15px; font-size: 1.05em; color: #000;">💡 Action Recommendations:</strong>
                             ${data.aiSummary.recommendations.map((rec, i) => `
                                 <div style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid #2196F3; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 0.95em; color: #000;">${typeof rec === 'string' ? rec : rec.title}</div>
                                     ${typeof rec === 'object' ? `
                                         <div style="font-size: 0.85em; line-height: 1.6; color: #555;">
-                                            <div style="margin-bottom: 6px;"><strong>✓ פעולה:</strong> ${rec.action}</div>
-                                            <div style="margin-bottom: 6px;"><strong>❓ למה:</strong> ${rec.why}</div>
-                                            <div style="margin-bottom: 6px;"><strong>📈 השפעה:</strong> ${rec.impact}</div>
-                                            <div><strong>⏱ זמן:</strong> ${rec.time}</div>
+                                            <div style="margin-bottom: 6px;"><strong>✓ Action:</strong> ${rec.action}</div>
+                                            <div style="margin-bottom: 6px;"><strong>❓ Why:</strong> ${rec.why}</div>
+                                            <div style="margin-bottom: 6px;"><strong>📈 Impact:</strong> ${rec.impact}</div>
+                                            <div><strong>⏱ Time:</strong> ${rec.time}</div>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -999,8 +999,8 @@
         }
 
         function getScoreDescription(score) {
-            if (score >= 90) return 'מעולה! Exposure גבוהה מאוד';
-            if (score >= 75) return 'טוב מאוד! Exposure גבוהה';
+            if (score >= 90) return 'Excellent! Very high exposure';
+            if (score >= 75) return 'Very good! High exposure';
             if (score >= 60) return 'Good - room for improvement';
             if (score >= 40) return 'Low - recommended to improve';
             return 'Very low - requires significant improvement';
@@ -1162,7 +1162,7 @@
                 const result = await response.json();
 
                 if (!result.success) {
-                    throw new Error(result.error || 'Error No ידועה');
+                    throw new Error(result.error || 'Unknown error');
                 }
 
                 // Merge file data with current URL data
@@ -1195,7 +1195,7 @@
 
             } catch (error) {
                 hideLoading();
-                showError(`Error בניתוח הקובץ: ${error.message}`);
+                showError(`File analysis error: ${error.message}`);
             }
         }
 
@@ -1205,34 +1205,34 @@
             const scores = data.scores;
 
             if (scores.weightsScore < 70) {
-                tips.push('📏 <strong>הוסף Weights נוספים:</strong> פונט עם 5+ Weights מקבל ציון גבוה יותר. שקול להוסיף Light, Regular, Medium, Bold, Black.');
+                tips.push('📏 <strong>Add more weights:</strong> Fonts with 5+ weights get higher scores. Consider adding Light, Regular, Medium, Bold, Black.');
             }
 
             if (scores.technicalScore < 70) {
                 if (!data.features.variable) {
-                    tips.push('🔧 <strong>Variable Font:</strong> המר את הפונט ל-Variable Font לתמיכה בטווח Weights רציף.');
+                    tips.push('🔧 <strong>Variable Font:</strong> Convert to Variable Font for continuous weight range support.');
                 }
                 if (!data.features.ligatures) {
-                    tips.push('✨ <strong>הוסף Ligatures:</strong> ליגטורות משפרות את מראה הפונט ומעלות את הציון הטכני.');
+                    tips.push('✨ <strong>Add Ligatures:</strong> Ligatures improve font appearance and technical score.');
                 }
                 if (!data.features.hebrew) {
-                    tips.push('🔤 <strong>תמיכה בHebrew:</strong> הוספת תווים עבריים תרחיב את קהל היעד.');
+                    tips.push('🔤 <strong>Hebrew Support:</strong> Adding Hebrew characters expands your target audience.');
                 }
             }
 
             if (scores.contentQuality < 70) {
-                tips.push('📝 <strong>שפר את התיאור:</strong> הוסף תיאור מפורט בדף הפונט (לפחות 50 תווים).');
-                if (data.platform === 'Independent Site') {
-                    tips.push('🌐 <strong>העלה לPlatform מוכרת:</strong> Google Fonts או Adobe Fonts יעניקו ציון גבוה יותר.');
+                tips.push('📝 <strong>Improve description:</strong> Add detailed description on font page (at least 50 characters).');
+                if (data.platform === 'Independent Site' || data.platform === 'אתר עצמאי') {
+                    tips.push('🌐 <strong>Upload to known platform:</strong> Google Fonts or Adobe Fonts will give higher scores.');
                 }
             }
 
             if (data.mentions && data.mentions.totalResults < 1000) {
-                tips.push('📢 <strong>הגבר Exposure:</strong> שתף את הפונט ברשתות חברתיות, בלוגים ופורומים של עיצוב.');
+                tips.push('📢 <strong>Increase exposure:</strong> Share your font on social media, blogs, and design forums.');
             }
 
             if (scores.final >= 90) {
-                tips.push('🎉 <strong>מעולה!</strong> הפונט שלך בציון גבוה מאוד. המשך לקדם אותו ברשתות.');
+                tips.push('🎉 <strong>Excellent!</strong> Your font has a very high score. Keep promoting it on social networks.');
             }
 
             return tips;
