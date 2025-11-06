@@ -229,26 +229,107 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top 10 sources from each platform
+                    // Add top 10 sources from each platform with balanced filtering
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
                             const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
+                            const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Basic relevance check: font name should appear with font/typography context
-                            const hasFontName = combinedText.includes(fontNameLower);
-                            const hasFontKeyword = /(font|typeface|typography|design)/i.test(combinedText);
+                            // Filter out false positives - pets, animals, adoption, sales, etc.
+                            const irrelevantKeywords = [
+                                // Animals & pets
+                                'כלב', 'כלבה', 'גור', 'גורה', 'חתול', 'חתולה', 'כלבלב',
+                                'dog', 'puppy', 'cat', 'kitten', 'pet', 'adoption', 'adopt',
+                                'אימוץ', 'מחפש בית', 'למסירה', 'looking for a home',
+                                'בעל חיים', 'animal', 'זנב', 'tail', 'paws', 'כפות',
+                                'מאמץ', 'דוגמן', 'model', 'חברותית', 'friendly',
+                                // Sales & products (phones, devices, etc.)
+                                'jual', 'beli', 'promo', 'limited stock', 'redmi', 'xiaomi',
+                                'samsung', 'iphone', 'phone', 'battery', 'camera', 'gadget',
+                                'למכירה', 'מכירה', 'sale', 'for sale', 'buy', 'sell',
+                                'price', 'מחיר', 'discount', 'הנחה', 'deal', 'offer',
+                                // Other unrelated
+                                'restaurant', 'food', 'recipe', 'travel', 'hotel'
+                            ];
 
-                            // Keep result if it's relevant to fonts
-                            if (hasFontName || hasFontKeyword) {
-                                results.sources.push({
-                                    platform: platform.name,
-                                    title: result.title,
-                                    url: result.link,
-                                    snippet: result.snippet || ''
-                                });
+                            const hasIrrelevantKeyword = irrelevantKeywords.some(keyword =>
+                                combinedText.includes(keyword)
+                            );
+
+                            if (hasIrrelevantKeyword) return; // Skip irrelevant posts
+
+                            // Basic filtering that works:
+                            // 1. Font name must appear IN CONTEXT with font keyword
+                            const hasFontName = combinedText.includes(fontNameLower);
+                            const hasFontKeyword = /(פונט|font|גופן|typeface|typography)/i.test(combinedText);
+
+                            if (!hasFontName || !hasFontKeyword) return;
+
+                            // 1.5. Must have design/typography context keywords
+                            const designContextKeywords = [
+                                'עיצוב', 'design', 'graphic', 'טיפוגרפיה', 'typography',
+                                'type', 'lettering', 'אותיות', 'text', 'טקסט',
+                                'logo', 'לוגו', 'branding', 'מיתוג', 'weight', 'משקל',
+                                'bold', 'italic', 'regular', 'light', 'thin',
+                                'opentype', 'ttf', 'otf', 'woff', 'web font', 'google fonts',
+                                'adobe fonts', 'typeface', 'character', 'glyph', 'letter'
+                            ];
+
+                            const hasDesignContext = designContextKeywords.some(keyword =>
+                                combinedText.includes(keyword.toLowerCase())
+                            );
+
+                            if (!hasDesignContext) return; // Skip posts without design context
+
+                            // 2. Make sure this specific font is mentioned, not another font
+                            // Check if "font [fontname]" or "[fontname] font" appears
+                            const fontNameInContext = new RegExp(`(פונט\\s+${fontNameLower}|${fontNameLower}\\s+font|font\\s+${fontNameLower}|${fontNameLower}\\s+פונט)`, 'i');
+
+                            if (!fontNameInContext.test(combinedText)) {
+                                // Font name appears but not in context - might be wrong font
+                                // Skip this result
+                                return;
                             }
+
+                            // 3. Extract designer domain from font URL
+                            let designerDomain = '';
+                            try {
+                                const urlObj = new URL(fontUrl);
+                                designerDomain = urlObj.hostname.replace('www.', '');
+                            } catch (e) {}
+
+                            // 4. Filter out designer's own promotional posts ONLY
+                            // The key: keep posts where OTHER people mention the font, filter only designer's own posts
+
+                            // If from designer's domain, skip
+                            if (designerDomain && url.includes(designerDomain)) return;
+
+                            // Extract username from Instagram URL if possible
+                            // Instagram URLs: instagram.com/USERNAME/ or instagram.com/p/POSTID/
+                            // We want to skip posts FROM the designer's account (liabaratz or lia_baratz)
+                            const isFromDesignerInstagram =
+                                url.includes('instagram.com/lia_baratz/') ||
+                                url.includes('instagram.com/liabaratz/');
+
+                            // For Instagram posts: if title starts with designer's name, it's from their account
+                            // ALSO: if snippet contains "lia_baratz's profile picture" it's from their Instagram
+                            const isDesignerInstagramPost =
+                                url.includes('instagram.com') &&
+                                ((result.title || '').match(/^lia\s*baratz\s*[|•]/i) ||
+                                 snippet.includes("lia_baratz's profile picture") ||
+                                 snippet.includes('lia_baratz\n'));
+
+                            if (isFromDesignerInstagram || isDesignerInstagramPost) return;
+
+                            // Add to results
+                            results.sources.push({
+                                platform: platform.name,
+                                title: result.title,
+                                url: result.link,
+                                snippet: result.snippet || ''
+                            });
                         });
                     }
                 }
@@ -429,57 +510,57 @@ function generateFontVisualDescription(pageData, fontName) {
     // Extract keywords about the font style
     const allText = `${title} ${description} ${bodyText}`.toLowerCase();
 
-    let visualDescription = `The "${fontName}" font is `;
+    let visualDescription = `הפונט "${fontName}" הוא `;
     const styles = [];
 
     // Detect style keywords
-    if (allText.includes('מודרני') || allText.includes('modern')) styles.push('modern');
-    if (allText.includes('מסורתי') || allText.includes('traditional') || allText.includes('classic')) styles.push('traditional');
-    if (allText.includes('קליגרפי') || allText.includes('calligraph')) styles.push('calligraphic');
-    if (allText.includes('גיאומטרי') || allText.includes('geometric')) styles.push('geometric');
-    if (allText.includes('אלגנטי') || allText.includes('elegant')) styles.push('elegant');
-    if (allText.includes('מעוטר') || allText.includes('decorative')) styles.push('decorative');
-    if (allText.includes('נקי') || allText.includes('clean') || allText.includes('simple')) styles.push('clean and minimalist');
-    if (allText.includes('חזק') || allText.includes('bold') || allText.includes('strong')) styles.push('strong and bold');
-    if (allText.includes('עדין') || allText.includes('delicate') || allText.includes('light')) styles.push('delicate');
-    if (allText.includes('חסידי') || allText.includes('hasid')) styles.push('hasidic style');
-    if (allText.includes('יוקרתי') || allText.includes('luxury')) styles.push('luxurious');
+    if (allText.includes('מודרני') || allText.includes('modern')) styles.push('מודרני');
+    if (allText.includes('מסורתי') || allText.includes('traditional') || allText.includes('classic')) styles.push('מסורתי');
+    if (allText.includes('קליגרפי') || allText.includes('calligraph')) styles.push('קליגרפי');
+    if (allText.includes('גיאומטרי') || allText.includes('geometric')) styles.push('גיאומטרי');
+    if (allText.includes('אלגנטי') || allText.includes('elegant')) styles.push('אלגנטי');
+    if (allText.includes('מעוטר') || allText.includes('decorative')) styles.push('מעוטר');
+    if (allText.includes('נקי') || allText.includes('clean') || allText.includes('simple')) styles.push('נקי ומינימליסטי');
+    if (allText.includes('חזק') || allText.includes('bold') || allText.includes('strong')) styles.push('חזק ובולט');
+    if (allText.includes('עדין') || allText.includes('delicate') || allText.includes('light')) styles.push('עדין');
+    if (allText.includes('חסידי') || allText.includes('hasid')) styles.push('בסגנון חסידי');
+    if (allText.includes('יוקרתי') || allText.includes('luxury')) styles.push('יוקרתי');
 
     if (styles.length > 0) {
         visualDescription += styles.join(', ') + '. ';
     } else {
-        visualDescription += 'a unique font. ';
+        visualDescription += 'פונט עברי ייחודי. ';
     }
 
     // Add usage context
     const usages = [];
-    if (allText.includes('לוגו') || allText.includes('logo')) usages.push('logos');
-    if (allText.includes('כותרת') || allText.includes('headline') || allText.includes('title')) usages.push('headlines');
-    if (allText.includes('טקסט') || allText.includes('body text')) usages.push('body text');
-    if (allText.includes('ספר') || allText.includes('book')) usages.push('books');
-    if (allText.includes('פוסטר') || allText.includes('poster')) usages.push('posters');
-    if (allText.includes('מיתוג') || allText.includes('branding')) usages.push('branding');
-    if (allText.includes('אריזה') || allText.includes('packaging')) usages.push('packaging');
-    if (allText.includes('אתר') || allText.includes('web') || allText.includes('digital')) usages.push('digital design');
+    if (allText.includes('לוגו') || allText.includes('logo')) usages.push('לוגואים');
+    if (allText.includes('כותרת') || allText.includes('headline') || allText.includes('title')) usages.push('כותרות');
+    if (allText.includes('טקסט') || allText.includes('body text')) usages.push('טקסט גוף');
+    if (allText.includes('ספר') || allText.includes('book')) usages.push('ספרים');
+    if (allText.includes('פוסטר') || allText.includes('poster')) usages.push('פוסטרים');
+    if (allText.includes('מיתוג') || allText.includes('branding')) usages.push('מיתוג');
+    if (allText.includes('אריזה') || allText.includes('packaging')) usages.push('אריזות');
+    if (allText.includes('אתר') || allText.includes('web') || allText.includes('digital')) usages.push('עיצוב דיגיטלי');
 
     if (usages.length > 0) {
-        visualDescription += `Especially suitable for ${usages.join(', ')}. `;
+        visualDescription += `מתאים במיוחד ל${usages.join(', ')}. `;
     }
 
     // Add character info
     if (allText.includes('ליגטורה') || allText.includes('ligature')) {
-        visualDescription += 'Includes rich ligatures. ';
+        visualDescription += 'כולל ליגטורות עשירות. ';
     }
     if (allText.includes('משקלים') || allText.includes('weights')) {
-        visualDescription += 'Available in multiple weights. ';
+        visualDescription += 'זמין במספר משקלים. ';
     }
     if (allText.includes('נקוד') || allText.includes('nikud')) {
-        visualDescription += 'Fully vocalized. ';
+        visualDescription += 'מנוקד באופן מלא. ';
     }
 
     // If we got nothing, use generic but positive description
-    if (visualDescription === `The font "${fontName}" is `) {
-        visualDescription = `The font "${fontName}" is a carefully designed font that combines aesthetics and functionality. Suitable for a wide range of design uses.`;
+    if (visualDescription === `הפונט "${fontName}" הוא `) {
+        visualDescription = `הפונט "${fontName}" הוא פונט עברי מעוצב בקפידה, המשלב אסתטיקה ופונקציונליות. מתאים למגוון שימושים עיצוביים.`;
     }
 
     return {
@@ -515,40 +596,40 @@ function analyzeContentWithGPT(pageData, fontName) {
     // Identify strengths
     const strengths = [];
     if (contentLength > 800) {
-        strengths.push('Detailed and informative font description');
+        strengths.push('תיאור מפורט ואינפורמטיבי של הפונט');
     }
     if (pageData.hasHttps) {
-        strengths.push('Secure website with HTTPS');
+        strengths.push('אתר מאובטח עם HTTPS');
     }
     if (pageData.ogTitle && pageData.ogDesc) {
-        strengths.push('Good optimization for social media sharing');
+        strengths.push('אופטימיזציה טובה לשיתוף ברשתות חברתיות');
     }
     if (h1 && description) {
-        strengths.push('Clear page structure with heading and description');
+        strengths.push('מבנה עמוד ברור עם כותרת ותיאור');
     }
 
     // If we have few strengths, add generic positive notes
     if (strengths.length < 2) {
-        strengths.push('Page contains basic font information');
-        strengths.push('Font is displayed clearly');
+        strengths.push('העמוד מכיל מידע בסיסי על הפונט');
+        strengths.push('הפונט מוצג באופן ברור');
     }
 
     // Identify improvements
     const improvements = [];
     if (contentLength < 500) {
-        improvements.push('Expand font description - add story, usage examples, and suitable use cases');
+        improvements.push('הרחיבו את תיאור הפונט - הוסיפו סיפור, דוגמאות שימוש, ומקרים שבהם הפונט מתאים');
     }
     if (!description || description.length < 100) {
-        improvements.push('Add detailed meta description for SEO improvement');
+        improvements.push('הוסיפו תיאור מפורט ב-meta description לשיפור SEO');
     }
     if (!pageData.ogTitle || !pageData.ogDesc) {
-        improvements.push('Add Open Graph tags for perfect social media sharing');
+        improvements.push('הוסיפו Open Graph tags לשיתוף מושלם ברשתות חברתיות');
     }
     if (title.length < 30) {
-        improvements.push('Expand page title to include relevant keywords');
+        improvements.push('הרחיבו את כותרת העמוד כך שתכלול מילות מפתח רלוונטיות');
     }
     if (!bodyText.includes('דוגמ') && !bodyText.includes('example')) {
-        improvements.push('Add usage examples and test cases for the font');
+        improvements.push('הוסיפו דוגמאות שימוש ומקרי מבחן לפונט');
     }
 
     // Take top 2-3
@@ -573,7 +654,7 @@ function analyzeMentionsSentiment(sources, fontName) {
             positive: 0,
             neutral: 0,
             negative: 0,
-            highlights: ['No mentions found for analysis'],
+            highlights: ['לא נמצאו איזכורים לניתוח'],
             method: 'rule-based'
         };
     }
@@ -647,7 +728,7 @@ function analyzeMentionsSentiment(sources, fontName) {
         positive: positive,
         neutral: neutral,
         negative: negative,
-        highlights: finalHighlights.length > 0 ? finalHighlights : ['Font mentions found online'],
+        highlights: finalHighlights.length > 0 ? finalHighlights : ['נמצאו איזכורים של הפונט ברשת'],
         method: 'rule-based'
     };
 }
@@ -672,26 +753,26 @@ function generateSummaryAndRecommendations(allData, fontName) {
     let summary = '';
 
     if (finalScore >= 70) {
-        summary = `🎉 Excellent! The font "${fontName}" ranks in the ${finalScore > 85 ? 'TOP 15%' : 'TOP 30%'} for digital exposure. `;
+        summary = `🎉 מעולה! הפונט "${fontName}" נמצא ב-${finalScore > 85 ? 'TOP 15%' : 'TOP 30%'} של פונטים בחשיפה דיגיטלית. `;
     } else if (finalScore >= 40) {
-        summary = `The font "${fontName}" is on the right track (score: ${finalScore}/100). Significant potential for improvement! `;
+        summary = `הפונט "${fontName}" בדרך הנכונה (ציון: ${finalScore}/100). יש פוטנציאל משמעותי לשיפור! `;
     } else {
-        summary = `The font "${fontName}" needs an upgrade (score: ${finalScore}/100). Let's do this together! `;
+        summary = `הפונט "${fontName}" צריך שדרוג (ציון: ${finalScore}/100). בואו נעשה את זה ביחד! `;
     }
 
     // Add specific context
     if (pageRank && pageRank <= 3) {
-        summary += `Ranked #${pageRank} on Google - excellent! `;
+        summary += `מדורג במקום ${pageRank} בגוגל - מעולה! `;
     } else if (!pageRank) {
-        summary += `Not found in Google's top 100 - this is the biggest opportunity for improvement. `;
+        summary += `לא נמצא ב-100 הראשונים בגוגל - זה הפוטנציאל הכי גדול לשיפור. `;
     }
 
     if (totalMentions > 20) {
-        summary += `${totalMentions} mentions online - you have an audience! `;
+        summary += `${totalMentions} איזכורים ברשת - יש לכם קהל! `;
     } else if (totalMentions > 0) {
-        summary += `Only ${totalMentions} mentions - let's grow this. `;
+        summary += `${totalMentions} איזכורים בלבד - בואו נגדיל את זה. `;
     } else {
-        summary += `No social media mentions - this must change. `;
+        summary += `אין איזכורים ברשתות - זה חייב להשתנות. `;
     }
 
     // Build ACTIONABLE recommendations with details
@@ -700,93 +781,93 @@ function generateSummaryAndRecommendations(allData, fontName) {
     // Critical: Meta description
     if (!seoDetails.hasMetaDescription) {
         recommendations.push({
-            title: '🚨 CRITICAL: Add Meta Description',
-            action: `Add to code: <meta name="description" content="${fontName} font - [describe the font in 120-160 characters]">`,
-            why: 'Without this, Google doesn\'t know what to write in search results',
-            impact: '↑ Up to 30% more clicks from Google',
-            time: '⏱ 5 minutes'
+            title: '🚨 CRITICAL: הוסיפו Meta Description',
+            action: `הוסיפו לקוד: <meta name="description" content="פונט ${fontName} - [תארו את הפונט ב-120-160 תווים]">`,
+            why: 'ללא זה, גוגל לא יודע מה לכתוב בתוצאות החיפוש',
+            impact: '↑ עד 30% יותר clicks מגוגל',
+            time: '⏱ 5 דקות'
         });
     } else if (seoDetails.descriptionLength < 100) {
         recommendations.push({
-            title: '📝 Expand Meta Description',
-            action: `Currently ${seoDetails.descriptionLength} characters, need 120-160. Add keywords and uses`,
-            why: 'Description too short doesn\'t attract clicks',
-            impact: '↑ SEO improvement',
-            time: '⏱ 10 minutes'
+            title: '📝 הרחיבו את ה-Meta Description',
+            action: `כרגע ${seoDetails.descriptionLength} תווים, צריך 120-160. הוסיפו מילות מפתח ושימושים`,
+            why: 'Description קצר מדי לא מושך clicks',
+            impact: '↑ שיפור SEO',
+            time: '⏱ 10 דקות'
         });
     }
 
     // Critical: Open Graph
     if (!seoDetails.hasOpenGraph) {
         recommendations.push({
-            title: '🚨 CRITICAL: Open Graph for Social Media',
-            action: 'Add: <meta property="og:title" content="..."><meta property="og:image" content="..."><meta property="og:description" content="...">',
-            why: 'Without this, social media shares look poor',
-            impact: '↑ Shares look 10x better',
-            time: '⏱ 15 minutes'
+            title: '🚨 CRITICAL: Open Graph למדיה חברתית',
+            action: 'הוסיפו: <meta property="og:title" content="..."><meta property="og:image" content="..."><meta property="og:description" content="...">',
+            why: 'בלי זה, שיתופים ברשתות נראים גרועים',
+            impact: '↑ שיתופים נראים פי 10 יותר טוב',
+            time: '⏱ 15 דקות'
         });
     }
 
     // High: Backlinks
     if (backlinks < 5) {
         recommendations.push({
-            title: '🔗 Get 5 External Links',
-            action: '1) Submit to fontsquirrel.com 2) Post on reddit.com/r/typography 3) Add to Behance.net 4) List on dafont.com 5) Submit to typewolf.com 6) Share on fontsinuse.com',
-            why: 'External links = credibility for Google',
-            impact: '↑ Each link = +15 ranking points',
-            time: '⏱ One week'
+            title: '🔗 קבלו 5 קישורים חיצוניים',
+            action: '1) פרסמו ב-alefalefalef.co.il/forum 2) כתבו פוסט ב-reddit.com/r/typography 3) שלחו לבלוגים עיצוב 4) הוסיפו ל-fontsquirrel.com 5) שתפו בקבוצות פייסבוק',
+            why: 'קישורים חיצוניים = אמינות לגוגל',
+            impact: '↑ כל קישור = +15 נקודות דירוג',
+            time: '⏱ שבוע עבודה'
         });
     }
 
     // High: Instagram presence
     if (allData.socialMedia?.instagram < 5) {
         recommendations.push({
-            title: '📸 Create 10 Instagram Posts',
-            action: `Post examples of ${fontName} in use: logos, posters, books, packaging. Tag: #${fontName.replace(/\s+/g, '')}Font #typography #fontdesign #typeface #lettering #customtype`,
-            why: 'Instagram = the main platform for designers',
-            impact: '↑ Exposure to target audience',
-            time: '⏱ Two weeks'
+            title: '📸 צרו 10 פוסטים באינסטגרם',
+            action: `פרסמו דוגמאות של ${fontName} בשימוש: לוגואים, פוסטרים, ספרים, אריזות. תייגו: #${fontName.replace(/\s+/g, '')}Font #hebrewtype #typography #fontdesign`,
+            why: 'אינסטגרם = הפלטפורמה המרכזית של מעצבים',
+            impact: '↑ חשיפה לקהל יעד',
+            time: '⏱ שבועיים'
         });
     }
 
     // Medium: Content expansion
     if (allData.contentLength < 300) {
         recommendations.push({
-            title: '📄 Expand Page Content to 500+ Words',
-            action: 'Add: 1) Font story 2) 3 usage examples 3) Who the font is for 4) What makes it unique 5) All weights',
-            why: 'Google prefers rich, detailed content',
-            impact: '↑ Search ranking',
-            time: '⏱ 2-3 hours'
+            title: '📄 הרחיבו את תוכן העמוד ל-500+ מילים',
+            action: 'הוסיפו: 1) סיפור הפונט 2) 3 דוגמאות שימוש 3) למי הפונט מתאים 4) מה ייחודי בו 5) כל המשקלים',
+            why: 'גוגל מעדיף תוכן עשיר ומפורט',
+            impact: '↑ דירוג בחיפוש',
+            time: '⏱ 2-3 שעות'
         });
     }
 
     // Medium: Schema.org
     if (!seoDetails.hasStructuredData) {
         recommendations.push({
-            title: '⚙️ Add Schema.org Product Markup',
-            action: 'Add JSON-LD schema with font name, description, price, rating - Google will show stars in results',
-            why: 'Rich snippets attract 2x more clicks',
-            impact: '↑ Stand out in Google',
-            time: '⏱ 20 minutes'
+            title: '⚙️ הוסיפו Schema.org Product Markup',
+            action: 'הוסיפו JSON-LD schema עם שם הפונט, תיאור, מחיר, rating - גוגל יראה כוכבים בתוצאות',
+            why: 'Rich snippets מושכים פי 2 יותר clicks',
+            impact: '↑ הופעה בולטת בגוגל',
+            time: '⏱ 20 דקות'
         });
     }
 
     // Growth: Case study
     recommendations.push({
-        title: '🎯 Create Project Case Study',
-        action: `Choose a project using ${fontName}, document: 1) The brief 2) Why chosen 3) The result 4) Before-after images`,
-        why: 'Case studies prove real value',
-        impact: '↑ Attracts clients',
-        time: '⏱ 4-5 hours'
+        title: '🎯 צרו Case Study של פרויקט',
+        action: `בחרו פרויקט שהשתמש ב-${fontName}, תעדו: 1) הבריף 2) למה בחרו בפונט 3) התוצאה 4) תמונות לפני-אחרי`,
+        why: 'Case studies מוכיחים ערך אמיתי',
+        impact: '↑ מושך לקוחות',
+        time: '⏱ 4-5 שעות'
     });
 
     // Growth: Video
     recommendations.push({
-        title: '🎬 Make 30-Second Video',
-        action: 'Show font in motion - letter animation, or quick slideshow of examples',
-        why: 'Video = 3x engagement',
-        impact: '↑ Social shares',
-        time: '⏱ One day'
+        title: '🎬 עשו וידאו 30 שניות',
+        action: 'הראו את הפונט בתנועה - אנימציה של אותיות, או מצגת מהירה של דוגמאות',
+        why: 'וידאו = פי 3 engagement',
+        impact: '↑ שיתופים ברשתות',
+        time: '⏱ יום עבודה'
     });
 
     // Sort by priority and take top 5
@@ -1174,8 +1255,8 @@ function analyzeData(data, urlObj) {
     // Extract font name from H1 or Title, prioritizing H1
     let fontName = data.h1 || data.title;
 
-    // Split by common separators and take the first part (but keep hyphens as they're part of font names)
-    fontName = fontName.split('|')[0].split('–')[0].split(':')[0].trim();
+    // Split by common separators and take the first part
+    fontName = fontName.split('|')[0].split('-')[0].split('–')[0].split(':')[0].trim();
 
     // Remove common prefixes like "פונט", "font", "גופן" from the beginning
     fontName = fontName.replace(/^(פונט|font|גופן)\s+/i, '').trim();
@@ -1247,7 +1328,7 @@ function identifyPlatform(hostname) {
         }
     }
 
-    return { name: 'Independent Site', boost: 0 };
+    return { name: 'אתר עצמאי', boost: 0 };
 }
 
 function extractWeights(text) {
