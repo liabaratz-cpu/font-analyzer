@@ -237,6 +237,21 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
+                            // Filter out false positives - pets, animals, adoption
+                            const animalKeywords = [
+                                'כלב', 'כלבה', 'גור', 'גורה', 'חתול', 'חתולה', 'כלבלב',
+                                'dog', 'puppy', 'cat', 'kitten', 'pet', 'adoption', 'adopt',
+                                'אימוץ', 'מחפש בית', 'למסירה', 'looking for a home',
+                                'בעל חיים', 'animal', 'זנב', 'tail', 'paws', 'כפות',
+                                'מאמץ', 'דוגמן', 'model', 'חברותית', 'friendly'
+                            ];
+
+                            const hasAnimalKeyword = animalKeywords.some(keyword =>
+                                combinedText.includes(keyword)
+                            );
+
+                            if (hasAnimalKeyword) return; // Skip animal-related posts
+
                             // Basic filtering that works:
                             // 1. Font name must appear IN CONTEXT with font keyword
                             const hasFontName = combinedText.includes(fontNameLower);
