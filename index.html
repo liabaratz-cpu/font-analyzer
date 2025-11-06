@@ -611,6 +611,25 @@
             </div>
         </div>
 
+        <!-- Partnership CTA -->
+        <div class="info-section" id="partnershipCTA" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; margin: 40px auto; padding: 48px 32px; max-width: 800px;">
+            <h2 style="font-size: 2em; margin-bottom: 16px; color: white;">📈 Ready to Scale Your Font Business?</h2>
+            <p style="font-size: 1.2em; margin-bottom: 24px; opacity: 0.95; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                Join FontBot and get your fonts in front of thousands of designers actively searching for the perfect typeface.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
+                <a href="https://fontbot.ai" target="_blank" class="btn" style="background: white; color: #667eea; text-decoration: none; display: inline-block; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
+                    🚀 Partner with FontBot
+                </a>
+                <a href="mailto:hello@fontbot.ai" class="btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: 2px solid white; text-decoration: none; display: inline-block;">
+                    📧 Contact Us
+                </a>
+            </div>
+            <p style="font-size: 0.9em; margin-top: 24px; opacity: 0.8;">
+                ✓ Zero upfront cost &nbsp; • &nbsp; ✓ Revenue share model &nbsp; • &nbsp; ✓ We handle marketing
+            </p>
+        </div>
+
         <div class="footer">
             <p>🚀 Font Exposure Analyzer | Built for Font Designers</p>
         </div>
@@ -1151,6 +1170,8 @@
 
         function showResults() {
             document.getElementById('results').classList.add('active');
+            // Show partnership CTA after results
+            document.getElementById('partnershipCTA').style.display = 'block';
         }
 
         function hideResults() {
