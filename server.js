@@ -233,13 +233,22 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
-                            // Add all results to sources - let frontend handle display
-                            results.sources.push({
-                                platform: platform.name,
-                                title: result.title,
-                                url: result.link,
-                                snippet: result.snippet || ''
-                            });
+                            const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
+                            const fontNameLower = fontName.toLowerCase();
+
+                            // Basic relevance check: font name should appear with font/typography context
+                            const hasFontName = combinedText.includes(fontNameLower);
+                            const hasFontKeyword = /(font|typeface|typography|design)/i.test(combinedText);
+
+                            // Keep result if it's relevant to fonts
+                            if (hasFontName || hasFontKeyword) {
+                                results.sources.push({
+                                    platform: platform.name,
+                                    title: result.title,
+                                    url: result.link,
+                                    snippet: result.snippet || ''
+                                });
+                            }
                         });
                     }
                 }
