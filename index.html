@@ -16,7 +16,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            background: #000000;
+            background: #ffffff;
             min-height: 100vh;
             padding: 0;
             margin: 0;
@@ -26,7 +26,7 @@
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
-            background: #000000;
+            background: #ffffff;
         }
 
         .header {
@@ -34,7 +34,7 @@
             color: #ffffff;
             padding: 80px 40px 60px;
             text-align: center;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: none;
         }
 
         .header h1 {
@@ -56,7 +56,7 @@
         }
 
         .accent {
-            color: #fcb900;
+            color: #f9c554;
             font-weight: 700;
             font-style: normal;
         }
@@ -65,7 +65,7 @@
             padding: 60px 40px;
             max-width: 800px;
             margin: 0 auto;
-            background: #000000;
+            background: #ffffff;
         }
 
         .input-section {
@@ -88,25 +88,25 @@
         .input-group input {
             flex: 1;
             padding: 16px 20px;
-            border: 2px solid #1a1a1a;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
             transition: all 0.3s ease;
             direction: ltr;
             text-align: left;
-            background: #1a1a1a;
-            color: #ffffff;
+            background: #ffffff;
+            color: #000000;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: #0693e3;
-            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(6, 147, 227, 0.15);
         }
 
         .btn {
             padding: 16px 32px;
-            background: #32373c;
+            background: #000000;
             color: white;
             border: none;
             border-radius: 8px;
@@ -115,13 +115,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
-            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
+            box-shadow: none;
         }
 
         .btn:hover {
-            background: #0693e3;
-            transform: translateY(-2px);
-            box-shadow: 12px 12px 50px rgba(6, 147, 227, 0.4);
+            background: #333333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn:disabled {
@@ -141,13 +141,17 @@
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #0693e3;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
+        }
+
+        .loading p {
+            color: #333333;
         }
 
         @keyframes spin {
@@ -165,12 +169,12 @@
 
         .error {
             display: none;
-            background: #1a1a1a;
-            border: 2px solid #ff4444;
+            background: #fff5f5;
+            border: 2px solid #cf2e2e;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 6px 6px 9px rgba(255, 68, 68, 0.2);
+            box-shadow: 0 2px 8px rgba(207, 46, 46, 0.1);
         }
 
         .error.active {
@@ -179,16 +183,16 @@
 
         .error-title {
             font-weight: 700;
-            color: #ff4444;
+            color: #cf2e2e;
             margin-bottom: 8px;
         }
 
         .error-message {
-            color: #abb8c3;
+            color: #666666;
         }
 
         .score-card {
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 48px;
             border-radius: 12px;
@@ -196,8 +200,8 @@
             margin-bottom: 32px;
             position: relative;
             overflow: hidden;
-            box-shadow: 12px 12px 50px rgba(0, 0, 0, 0.4);
-            border: 1px solid #2a2a2a;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);
+            border: none;
         }
 
         .score-card::before {
@@ -207,7 +211,7 @@
             right: -20px;
             width: 150px;
             height: 150px;
-            background: radial-gradient(circle, rgba(252, 185, 0, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
             border-radius: 50%;
         }
 
@@ -230,7 +234,7 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
-            color: #fcb900;
+            color: #ffffff;
         }
 
         .score-description {
@@ -248,23 +252,23 @@
         }
 
         .detail-card {
-            background: #1a1a1a;
+            background: #ffffff;
             padding: 24px;
             border-radius: 8px;
-            border: 1px solid #2a2a2a;
-            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
         }
 
         .detail-card:hover {
-            box-shadow: 12px 12px 50px rgba(6, 147, 227, 0.3);
+            box-shadow: 0 4px 16px rgba(6, 147, 227, 0.15);
             transform: translateY(-2px);
             border-color: #0693e3;
         }
 
         .detail-label {
             font-size: 0.9em;
-            color: #abb8c3;
+            color: #666666;
             margin-bottom: 8px;
             font-weight: 600;
         }
@@ -272,22 +276,22 @@
         .detail-value {
             font-size: 2em;
             font-weight: 700;
-            color: #fcb900;
+            color: #000000;
         }
 
         .info-section {
-            background: #1a1a1a;
+            background: #f8f9fa;
             padding: 32px;
             border-radius: 8px;
             margin-bottom: 24px;
-            border: 1px solid #2a2a2a;
-            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .info-title {
             font-size: 1.3em;
             font-weight: 700;
-            color: #ffffff;
+            color: #000000;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -298,7 +302,7 @@
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
-            border-bottom: 1px solid #2a2a2a;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .info-row:last-child {
@@ -307,11 +311,11 @@
 
         .info-key {
             font-weight: 600;
-            color: #abb8c3;
+            color: #666666;
         }
 
         .info-value {
-            color: #ffffff;
+            color: #000000;
             font-weight: 500;
         }
 
@@ -359,9 +363,9 @@
         .footer {
             text-align: center;
             padding: 20px;
-            color: #abb8c3;
-            border-top: 1px solid #1a1a1a;
-            background: #000000;
+            color: #666666;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
         }
 
         @media (max-width: 768px) {
@@ -403,7 +407,7 @@
                         Analyze Font
                     </button>
                 </div>
-                <p style="font-size: 0.85em; color: #999; margin-top: 8px;">
+                <p style="font-size: 0.85em; color: #666666; margin-top: 8px;">
                     💡 Enter a URL for full analysis, or just a font name to search social media mentions
                 </p>
             </div>
@@ -415,8 +419,8 @@
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="color: #666; font-size: 1.1em;" id="loadingText">Analyzing page... Please wait</p>
-                <p style="color: #999; font-size: 0.9em; margin-top: 10px;">⏱️ First scan takes 15-20 seconds (server waking up)</p>
+                <p style="color: #333333; font-size: 1.1em; font-weight: 600;" id="loadingText">Analyzing page... Please wait</p>
+                <p style="color: #666666; font-size: 0.9em; margin-top: 10px;">⏱️ First scan takes 15-20 seconds (server waking up)</p>
             </div>
 
             <div class="results" id="results">

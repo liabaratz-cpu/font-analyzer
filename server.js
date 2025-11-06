@@ -229,101 +229,11 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                     results[platform.name] = count;
                     results.total += count;
 
-                    // Add top 10 sources from each platform with balanced filtering
+                    // Add top 10 sources from each platform
                     if (data.organic_results && data.organic_results.length > 0) {
                         const topResults = data.organic_results.slice(0, 10);
                         topResults.forEach(result => {
-                            const combinedText = `${result.title || ''} ${result.snippet || ''}`.toLowerCase();
-                            const url = (result.link || '').toLowerCase();
-                            const fontNameLower = fontName.toLowerCase();
-
-                            // Filter out false positives - pets, animals, adoption, sales, etc.
-                            const irrelevantKeywords = [
-                                // Animals & pets
-                                'כלב', 'כלבה', 'גור', 'גורה', 'חתול', 'חתולה', 'כלבלב',
-                                'dog', 'puppy', 'cat', 'kitten', 'pet', 'adoption', 'adopt',
-                                'אימוץ', 'מחפש בית', 'למסירה', 'looking for a home',
-                                'בעל חיים', 'animal', 'זנב', 'tail', 'paws', 'כפות',
-                                'מאמץ', 'דוגמן', 'model', 'חברותית', 'friendly',
-                                // Sales & products (phones, devices, etc.)
-                                'jual', 'beli', 'promo', 'limited stock', 'redmi', 'xiaomi',
-                                'samsung', 'iphone', 'phone', 'battery', 'camera', 'gadget',
-                                'למכירה', 'מכירה', 'sale', 'for sale', 'buy', 'sell',
-                                'price', 'מחיר', 'discount', 'הנחה', 'deal', 'offer',
-                                // Other unrelated
-                                'restaurant', 'food', 'recipe', 'travel', 'hotel'
-                            ];
-
-                            const hasIrrelevantKeyword = irrelevantKeywords.some(keyword =>
-                                combinedText.includes(keyword)
-                            );
-
-                            if (hasIrrelevantKeyword) return; // Skip irrelevant posts
-
-                            // Basic filtering that works:
-                            // 1. Font name must appear IN CONTEXT with font keyword
-                            const hasFontName = combinedText.includes(fontNameLower);
-                            const hasFontKeyword = /(פונט|font|גופן|typeface|typography)/i.test(combinedText);
-
-                            if (!hasFontName || !hasFontKeyword) return;
-
-                            // 1.5. Must have design/typography context keywords
-                            const designContextKeywords = [
-                                'עיצוב', 'design', 'graphic', 'טיפוגרפיה', 'typography',
-                                'type', 'lettering', 'אותיות', 'text', 'טקסט',
-                                'logo', 'לוגו', 'branding', 'מיתוג', 'weight', 'משקל',
-                                'bold', 'italic', 'regular', 'light', 'thin',
-                                'opentype', 'ttf', 'otf', 'woff', 'web font', 'google fonts',
-                                'adobe fonts', 'typeface', 'character', 'glyph', 'letter'
-                            ];
-
-                            const hasDesignContext = designContextKeywords.some(keyword =>
-                                combinedText.includes(keyword.toLowerCase())
-                            );
-
-                            if (!hasDesignContext) return; // Skip posts without design context
-
-                            // 2. Make sure this specific font is mentioned, not another font
-                            // Check if "font [fontname]" or "[fontname] font" appears
-                            const fontNameInContext = new RegExp(`(פונט\\s+${fontNameLower}|${fontNameLower}\\s+font|font\\s+${fontNameLower}|${fontNameLower}\\s+פונט)`, 'i');
-
-                            if (!fontNameInContext.test(combinedText)) {
-                                // Font name appears but not in context - might be wrong font
-                                // Skip this result
-                                return;
-                            }
-
-                            // 3. Extract designer domain from font URL
-                            let designerDomain = '';
-                            try {
-                                const urlObj = new URL(fontUrl);
-                                designerDomain = urlObj.hostname.replace('www.', '');
-                            } catch (e) {}
-
-                            // 4. Filter out designer's own promotional posts ONLY
-                            // The key: keep posts where OTHER people mention the font, filter only designer's own posts
-
-                            // If from designer's domain, skip
-                            if (designerDomain && url.includes(designerDomain)) return;
-
-                            // Extract username from Instagram URL if possible
-                            // Instagram URLs: instagram.com/USERNAME/ or instagram.com/p/POSTID/
-                            // We want to skip posts FROM the designer's account (liabaratz or lia_baratz)
-                            const isFromDesignerInstagram =
-                                url.includes('instagram.com/lia_baratz/') ||
-                                url.includes('instagram.com/liabaratz/');
-
-                            // For Instagram posts: if title starts with designer's name, it's from their account
-                            // ALSO: if snippet contains "lia_baratz's profile picture" it's from their Instagram
-                            const isDesignerInstagramPost =
-                                url.includes('instagram.com') &&
-                                ((result.title || '').match(/^lia\s*baratz\s*[|•]/i) ||
-                                 snippet.includes("lia_baratz's profile picture") ||
-                                 snippet.includes('lia_baratz\n'));
-
-                            if (isFromDesignerInstagram || isDesignerInstagramPost) return;
-
-                            // Add to results
+                            // Add all results to sources - let frontend handle display
                             results.sources.push({
                                 platform: platform.name,
                                 title: result.title,
