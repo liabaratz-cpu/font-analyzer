@@ -420,26 +420,26 @@ function generateFontVisualDescription(pageData, fontName) {
     // Extract keywords about the font style
     const allText = `${title} ${description} ${bodyText}`.toLowerCase();
 
-    let visualDescription = `הפונט "${fontName}" הוא `;
+    let visualDescription = `The "${fontName}" font is `;
     const styles = [];
 
     // Detect style keywords
-    if (allText.includes('מודרני') || allText.includes('modern')) styles.push('מודרני');
-    if (allText.includes('מסורתי') || allText.includes('traditional') || allText.includes('classic')) styles.push('מסורתי');
-    if (allText.includes('קליגרפי') || allText.includes('calligraph')) styles.push('קליגרפי');
-    if (allText.includes('גיאומטרי') || allText.includes('geometric')) styles.push('גיאומטרי');
-    if (allText.includes('אלגנטי') || allText.includes('elegant')) styles.push('אלגנטי');
-    if (allText.includes('מעוטר') || allText.includes('decorative')) styles.push('מעוטר');
-    if (allText.includes('נקי') || allText.includes('clean') || allText.includes('simple')) styles.push('נקי ומינימליסטי');
-    if (allText.includes('חזק') || allText.includes('bold') || allText.includes('strong')) styles.push('חזק ובולט');
-    if (allText.includes('עדין') || allText.includes('delicate') || allText.includes('light')) styles.push('עדין');
-    if (allText.includes('חסידי') || allText.includes('hasid')) styles.push('בסגנון חסידי');
-    if (allText.includes('יוקרתי') || allText.includes('luxury')) styles.push('יוקרתי');
+    if (allText.includes('מודרני') || allText.includes('modern')) styles.push('modern');
+    if (allText.includes('מסורתי') || allText.includes('traditional') || allText.includes('classic')) styles.push('traditional');
+    if (allText.includes('קליגרפי') || allText.includes('calligraph')) styles.push('calligraphic');
+    if (allText.includes('גיאומטרי') || allText.includes('geometric')) styles.push('geometric');
+    if (allText.includes('אלגנטי') || allText.includes('elegant')) styles.push('elegant');
+    if (allText.includes('מעוטר') || allText.includes('decorative')) styles.push('decorative');
+    if (allText.includes('נקי') || allText.includes('clean') || allText.includes('simple')) styles.push('clean and minimalist');
+    if (allText.includes('חזק') || allText.includes('bold') || allText.includes('strong')) styles.push('strong and bold');
+    if (allText.includes('עדין') || allText.includes('delicate') || allText.includes('light')) styles.push('delicate');
+    if (allText.includes('חסידי') || allText.includes('hasid')) styles.push('hasidic style');
+    if (allText.includes('יוקרתי') || allText.includes('luxury')) styles.push('luxurious');
 
     if (styles.length > 0) {
         visualDescription += styles.join(', ') + '. ';
     } else {
-        visualDescription += 'פונט עברי ייחודי. ';
+        visualDescription += 'a unique font. ';
     }
 
     // Add usage context
