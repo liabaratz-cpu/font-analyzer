@@ -16,7 +16,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            background: #fafafa;
+            background: #000000;
             min-height: 100vh;
             padding: 0;
             margin: 0;
@@ -26,15 +26,15 @@
             max-width: 1200px;
             width: 100%;
             margin: 0 auto;
-            background: white;
+            background: #000000;
         }
 
         .header {
-            background: #ffffff;
-            color: #1a1a1a;
+            background: #000000;
+            color: #ffffff;
             padding: 80px 40px 60px;
             text-align: center;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #1a1a1a;
         }
 
         .header h1 {
@@ -42,13 +42,13 @@
             font-size: 42px;
             margin-bottom: 16px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #ffffff;
             letter-spacing: -0.5px;
         }
 
         .header p {
             font-size: 20px;
-            color: #666;
+            color: #abb8c3;
             font-weight: 400;
             max-width: 600px;
             margin: 0 auto;
@@ -56,15 +56,16 @@
         }
 
         .accent {
-            color: #0693e3;
+            color: #fcb900;
             font-weight: 700;
-            font-style: italic;
+            font-style: normal;
         }
 
         .content {
             padding: 60px 40px;
             max-width: 800px;
             margin: 0 auto;
+            background: #000000;
         }
 
         .input-section {
@@ -76,7 +77,7 @@
             font-size: 1.1em;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #333;
+            color: #ffffff;
         }
 
         .input-group {
@@ -87,19 +88,20 @@
         .input-group input {
             flex: 1;
             padding: 16px 20px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #1a1a1a;
             border-radius: 8px;
             font-size: 16px;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             direction: ltr;
             text-align: left;
-            background: #fff;
+            background: #1a1a1a;
+            color: #ffffff;
         }
 
         .input-group input:focus {
             outline: none;
             border-color: #0693e3;
-            box-shadow: 0 0 0 3px rgba(6, 147, 227, 0.1);
+            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
         }
 
         .btn {
@@ -111,14 +113,15 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             white-space: nowrap;
+            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
         }
 
         .btn:hover {
-            background: #1a1d21;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: #0693e3;
+            transform: translateY(-2px);
+            box-shadow: 12px 12px 50px rgba(6, 147, 227, 0.4);
         }
 
         .btn:disabled {
@@ -162,11 +165,12 @@
 
         .error {
             display: none;
-            background: #fee;
-            border-right: 4px solid #f44;
+            background: #1a1a1a;
+            border: 2px solid #ff4444;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 6px 6px 9px rgba(255, 68, 68, 0.2);
         }
 
         .error.active {
@@ -175,12 +179,12 @@
 
         .error-title {
             font-weight: 700;
-            color: #c33;
+            color: #ff4444;
             margin-bottom: 8px;
         }
 
         .error-message {
-            color: #666;
+            color: #abb8c3;
         }
 
         .score-card {
@@ -192,7 +196,8 @@
             margin-bottom: 32px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            box-shadow: 12px 12px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid #2a2a2a;
         }
 
         .score-card::before {
@@ -202,18 +207,18 @@
             right: -20px;
             width: 150px;
             height: 150px;
-            background: radial-gradient(circle, rgba(249, 197, 84, 0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(252, 185, 0, 0.15) 0%, transparent 70%);
             border-radius: 50%;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.05); opacity: 0.8; }
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.05); opacity: 0.6; }
         }
 
         .score-label {
             font-size: 1.2em;
-            opacity: 0.9;
+            color: #abb8c3;
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
@@ -225,11 +230,12 @@
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            color: #fcb900;
         }
 
         .score-description {
             font-size: 1.3em;
-            opacity: 0.95;
+            color: #ffffff;
             position: relative;
             z-index: 1;
         }
@@ -242,22 +248,23 @@
         }
 
         .detail-card {
-            background: #ffffff;
+            background: #1a1a1a;
             padding: 24px;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: all 0.2s ease;
+            border: 1px solid #2a2a2a;
+            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
         .detail-card:hover {
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            box-shadow: 12px 12px 50px rgba(6, 147, 227, 0.3);
             transform: translateY(-2px);
+            border-color: #0693e3;
         }
 
         .detail-label {
             font-size: 0.9em;
-            color: #666;
+            color: #abb8c3;
             margin-bottom: 8px;
             font-weight: 600;
         }
@@ -265,21 +272,22 @@
         .detail-value {
             font-size: 2em;
             font-weight: 700;
-            color: #333;
+            color: #fcb900;
         }
 
         .info-section {
-            background: #fafafa;
+            background: #1a1a1a;
             padding: 32px;
             border-radius: 8px;
             margin-bottom: 24px;
-            border: 1px solid #e8e8e8;
+            border: 1px solid #2a2a2a;
+            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
         }
 
         .info-title {
             font-size: 1.3em;
             font-weight: 700;
-            color: #333;
+            color: #ffffff;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -290,7 +298,7 @@
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #2a2a2a;
         }
 
         .info-row:last-child {
@@ -299,11 +307,11 @@
 
         .info-key {
             font-weight: 600;
-            color: #666;
+            color: #abb8c3;
         }
 
         .info-value {
-            color: #333;
+            color: #ffffff;
             font-weight: 500;
         }
 
@@ -317,18 +325,18 @@
         }
 
         .badge-success {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #00d084;
+            color: #000000;
         }
 
         .badge-warning {
-            background: #fff3e0;
-            color: #e65100;
+            background: #fcb900;
+            color: #000000;
         }
 
         .badge-info {
-            background: #e3f2fd;
-            color: #1565c0;
+            background: #0693e3;
+            color: #ffffff;
         }
 
         .weights-list {
@@ -345,13 +353,15 @@
             border-radius: 6px;
             font-size: 0.9em;
             font-weight: 600;
+            box-shadow: 6px 6px 9px rgba(0, 0, 0, 0.2);
         }
 
         .footer {
             text-align: center;
             padding: 20px;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
+            color: #abb8c3;
+            border-top: 1px solid #1a1a1a;
+            background: #000000;
         }
 
         @media (max-width: 768px) {
