@@ -444,33 +444,33 @@ function generateFontVisualDescription(pageData, fontName) {
 
     // Add usage context
     const usages = [];
-    if (allText.includes('לוגו') || allText.includes('logo')) usages.push('לוגואים');
-    if (allText.includes('כותרת') || allText.includes('headline') || allText.includes('title')) usages.push('כותרות');
-    if (allText.includes('טקסט') || allText.includes('body text')) usages.push('טקסט גוף');
-    if (allText.includes('ספר') || allText.includes('book')) usages.push('ספרים');
-    if (allText.includes('פוסטר') || allText.includes('poster')) usages.push('פוסטרים');
-    if (allText.includes('מיתוג') || allText.includes('branding')) usages.push('מיתוג');
-    if (allText.includes('אריזה') || allText.includes('packaging')) usages.push('אריזות');
-    if (allText.includes('אתר') || allText.includes('web') || allText.includes('digital')) usages.push('עיצוב דיגיטלי');
+    if (allText.includes('לוגו') || allText.includes('logo')) usages.push('logos');
+    if (allText.includes('כותרת') || allText.includes('headline') || allText.includes('title')) usages.push('headlines');
+    if (allText.includes('טקסט') || allText.includes('body text')) usages.push('body text');
+    if (allText.includes('ספר') || allText.includes('book')) usages.push('books');
+    if (allText.includes('פוסטר') || allText.includes('poster')) usages.push('posters');
+    if (allText.includes('מיתוג') || allText.includes('branding')) usages.push('branding');
+    if (allText.includes('אריזה') || allText.includes('packaging')) usages.push('packaging');
+    if (allText.includes('אתר') || allText.includes('web') || allText.includes('digital')) usages.push('digital design');
 
     if (usages.length > 0) {
-        visualDescription += `מתאים במיוחד ל${usages.join(', ')}. `;
+        visualDescription += `Especially suitable for ${usages.join(', ')}. `;
     }
 
     // Add character info
     if (allText.includes('ליגטורה') || allText.includes('ligature')) {
-        visualDescription += 'כולל ליגטורות עשירות. ';
+        visualDescription += 'Includes rich ligatures. ';
     }
     if (allText.includes('משקלים') || allText.includes('weights')) {
-        visualDescription += 'זמין במספר משקלים. ';
+        visualDescription += 'Available in multiple weights. ';
     }
     if (allText.includes('נקוד') || allText.includes('nikud')) {
-        visualDescription += 'מנוקד באופן מלא. ';
+        visualDescription += 'Fully vocalized. ';
     }
 
     // If we got nothing, use generic but positive description
-    if (visualDescription === `הפונט "${fontName}" הוא `) {
-        visualDescription = `הפונט "${fontName}" הוא פונט עברי מעוצב בקפידה, המשלב אסתטיקה ופונקציונליות. מתאים למגוון שימושים עיצוביים.`;
+    if (visualDescription === `The font "${fontName}" is `) {
+        visualDescription = `The font "${fontName}" is a carefully designed font that combines aesthetics and functionality. Suitable for a wide range of design uses.`;
     }
 
     return {
@@ -506,40 +506,40 @@ function analyzeContentWithGPT(pageData, fontName) {
     // Identify strengths
     const strengths = [];
     if (contentLength > 800) {
-        strengths.push('תיאור מפורט ואינפורמטיבי של הפונט');
+        strengths.push('Detailed and informative font description');
     }
     if (pageData.hasHttps) {
-        strengths.push('אתר מאובטח עם HTTPS');
+        strengths.push('Secure website with HTTPS');
     }
     if (pageData.ogTitle && pageData.ogDesc) {
-        strengths.push('אופטימיזציה טובה לשיתוף ברשתות חברתיות');
+        strengths.push('Good optimization for social media sharing');
     }
     if (h1 && description) {
-        strengths.push('מבנה עמוד ברור עם כותרת ותיאור');
+        strengths.push('Clear page structure with heading and description');
     }
 
     // If we have few strengths, add generic positive notes
     if (strengths.length < 2) {
-        strengths.push('העמוד מכיל מידע בסיסי על הפונט');
-        strengths.push('הפונט מוצג באופן ברור');
+        strengths.push('Page contains basic font information');
+        strengths.push('Font is displayed clearly');
     }
 
     // Identify improvements
     const improvements = [];
     if (contentLength < 500) {
-        improvements.push('הרחיבו את תיאור הפונט - הוסיפו סיפור, דוגמאות שימוש, ומקרים שבהם הפונט מתאים');
+        improvements.push('Expand font description - add story, usage examples, and suitable use cases');
     }
     if (!description || description.length < 100) {
-        improvements.push('הוסיפו תיאור מפורט ב-meta description לשיפור SEO');
+        improvements.push('Add detailed meta description for SEO improvement');
     }
     if (!pageData.ogTitle || !pageData.ogDesc) {
-        improvements.push('הוסיפו Open Graph tags לשיתוף מושלם ברשתות חברתיות');
+        improvements.push('Add Open Graph tags for perfect social media sharing');
     }
     if (title.length < 30) {
-        improvements.push('הרחיבו את כותרת העמוד כך שתכלול מילות מפתח רלוונטיות');
+        improvements.push('Expand page title to include relevant keywords');
     }
     if (!bodyText.includes('דוגמ') && !bodyText.includes('example')) {
-        improvements.push('הוסיפו דוגמאות שימוש ומקרי מבחן לפונט');
+        improvements.push('Add usage examples and test cases for the font');
     }
 
     // Take top 2-3
@@ -564,7 +564,7 @@ function analyzeMentionsSentiment(sources, fontName) {
             positive: 0,
             neutral: 0,
             negative: 0,
-            highlights: ['לא נמצאו איזכורים לניתוח'],
+            highlights: ['No mentions found for analysis'],
             method: 'rule-based'
         };
     }
@@ -638,7 +638,7 @@ function analyzeMentionsSentiment(sources, fontName) {
         positive: positive,
         neutral: neutral,
         negative: negative,
-        highlights: finalHighlights.length > 0 ? finalHighlights : ['נמצאו איזכורים של הפונט ברשת'],
+        highlights: finalHighlights.length > 0 ? finalHighlights : ['Font mentions found online'],
         method: 'rule-based'
     };
 }
@@ -663,26 +663,26 @@ function generateSummaryAndRecommendations(allData, fontName) {
     let summary = '';
 
     if (finalScore >= 70) {
-        summary = `🎉 מעולה! הפונט "${fontName}" נמצא ב-${finalScore > 85 ? 'TOP 15%' : 'TOP 30%'} של פונטים בחשיפה דיגיטלית. `;
+        summary = `🎉 Excellent! The font "${fontName}" ranks in the ${finalScore > 85 ? 'TOP 15%' : 'TOP 30%'} for digital exposure. `;
     } else if (finalScore >= 40) {
-        summary = `הפונט "${fontName}" בדרך הנכונה (ציון: ${finalScore}/100). יש פוטנציאל משמעותי לשיפור! `;
+        summary = `The font "${fontName}" is on the right track (score: ${finalScore}/100). Significant potential for improvement! `;
     } else {
-        summary = `הפונט "${fontName}" צריך שדרוג (ציון: ${finalScore}/100). בואו נעשה את זה ביחד! `;
+        summary = `The font "${fontName}" needs an upgrade (score: ${finalScore}/100). Let's do this together! `;
     }
 
     // Add specific context
     if (pageRank && pageRank <= 3) {
-        summary += `מדורג במקום ${pageRank} בגוגל - מעולה! `;
+        summary += `Ranked #${pageRank} on Google - excellent! `;
     } else if (!pageRank) {
-        summary += `לא נמצא ב-100 הראשונים בגוגל - זה הפוטנציאל הכי גדול לשיפור. `;
+        summary += `Not found in Google's top 100 - this is the biggest opportunity for improvement. `;
     }
 
     if (totalMentions > 20) {
-        summary += `${totalMentions} איזכורים ברשת - יש לכם קהל! `;
+        summary += `${totalMentions} mentions online - you have an audience! `;
     } else if (totalMentions > 0) {
-        summary += `${totalMentions} איזכורים בלבד - בואו נגדיל את זה. `;
+        summary += `Only ${totalMentions} mentions - let's grow this. `;
     } else {
-        summary += `אין איזכורים ברשתות - זה חייב להשתנות. `;
+        summary += `No social media mentions - this must change. `;
     }
 
     // Build ACTIONABLE recommendations with details
@@ -691,93 +691,93 @@ function generateSummaryAndRecommendations(allData, fontName) {
     // Critical: Meta description
     if (!seoDetails.hasMetaDescription) {
         recommendations.push({
-            title: '🚨 CRITICAL: הוסיפו Meta Description',
-            action: `הוסיפו לקוד: <meta name="description" content="פונט ${fontName} - [תארו את הפונט ב-120-160 תווים]">`,
-            why: 'ללא זה, גוגל לא יודע מה לכתוב בתוצאות החיפוש',
-            impact: '↑ עד 30% יותר clicks מגוגל',
-            time: '⏱ 5 דקות'
+            title: '🚨 CRITICAL: Add Meta Description',
+            action: `Add to code: <meta name="description" content="${fontName} font - [describe the font in 120-160 characters]">`,
+            why: 'Without this, Google doesn\'t know what to write in search results',
+            impact: '↑ Up to 30% more clicks from Google',
+            time: '⏱ 5 minutes'
         });
     } else if (seoDetails.descriptionLength < 100) {
         recommendations.push({
-            title: '📝 הרחיבו את ה-Meta Description',
-            action: `כרגע ${seoDetails.descriptionLength} תווים, צריך 120-160. הוסיפו מילות מפתח ושימושים`,
-            why: 'Description קצר מדי לא מושך clicks',
-            impact: '↑ שיפור SEO',
-            time: '⏱ 10 דקות'
+            title: '📝 Expand Meta Description',
+            action: `Currently ${seoDetails.descriptionLength} characters, need 120-160. Add keywords and uses`,
+            why: 'Description too short doesn\'t attract clicks',
+            impact: '↑ SEO improvement',
+            time: '⏱ 10 minutes'
         });
     }
 
     // Critical: Open Graph
     if (!seoDetails.hasOpenGraph) {
         recommendations.push({
-            title: '🚨 CRITICAL: Open Graph למדיה חברתית',
-            action: 'הוסיפו: <meta property="og:title" content="..."><meta property="og:image" content="..."><meta property="og:description" content="...">',
-            why: 'בלי זה, שיתופים ברשתות נראים גרועים',
-            impact: '↑ שיתופים נראים פי 10 יותר טוב',
-            time: '⏱ 15 דקות'
+            title: '🚨 CRITICAL: Open Graph for Social Media',
+            action: 'Add: <meta property="og:title" content="..."><meta property="og:image" content="..."><meta property="og:description" content="...">',
+            why: 'Without this, social media shares look poor',
+            impact: '↑ Shares look 10x better',
+            time: '⏱ 15 minutes'
         });
     }
 
     // High: Backlinks
     if (backlinks < 5) {
         recommendations.push({
-            title: '🔗 קבלו 5 קישורים חיצוניים',
-            action: '1) פרסמו ב-alefalefalef.co.il/forum 2) כתבו פוסט ב-reddit.com/r/typography 3) שלחו לבלוגים עיצוב 4) הוסיפו ל-fontsquirrel.com 5) שתפו בקבוצות פייסבוק',
-            why: 'קישורים חיצוניים = אמינות לגוגל',
-            impact: '↑ כל קישור = +15 נקודות דירוג',
-            time: '⏱ שבוע עבודה'
+            title: '🔗 Get 5 External Links',
+            action: '1) Post on alefalefalef.co.il/forum 2) Write post on reddit.com/r/typography 3) Send to design blogs 4) Add to fontsquirrel.com 5) Share in Facebook groups',
+            why: 'External links = credibility for Google',
+            impact: '↑ Each link = +15 ranking points',
+            time: '⏱ One week'
         });
     }
 
     // High: Instagram presence
     if (allData.socialMedia?.instagram < 5) {
         recommendations.push({
-            title: '📸 צרו 10 פוסטים באינסטגרם',
-            action: `פרסמו דוגמאות של ${fontName} בשימוש: לוגואים, פוסטרים, ספרים, אריזות. תייגו: #${fontName.replace(/\s+/g, '')}Font #hebrewtype #typography #fontdesign`,
-            why: 'אינסטגרם = הפלטפורמה המרכזית של מעצבים',
-            impact: '↑ חשיפה לקהל יעד',
-            time: '⏱ שבועיים'
+            title: '📸 Create 10 Instagram Posts',
+            action: `Post examples of ${fontName} in use: logos, posters, books, packaging. Tag: #${fontName.replace(/\s+/g, '')}Font #hebrewtype #typography #fontdesign`,
+            why: 'Instagram = the main platform for designers',
+            impact: '↑ Exposure to target audience',
+            time: '⏱ Two weeks'
         });
     }
 
     // Medium: Content expansion
     if (allData.contentLength < 300) {
         recommendations.push({
-            title: '📄 הרחיבו את תוכן העמוד ל-500+ מילים',
-            action: 'הוסיפו: 1) סיפור הפונט 2) 3 דוגמאות שימוש 3) למי הפונט מתאים 4) מה ייחודי בו 5) כל המשקלים',
-            why: 'גוגל מעדיף תוכן עשיר ומפורט',
-            impact: '↑ דירוג בחיפוש',
-            time: '⏱ 2-3 שעות'
+            title: '📄 Expand Page Content to 500+ Words',
+            action: 'Add: 1) Font story 2) 3 usage examples 3) Who the font is for 4) What makes it unique 5) All weights',
+            why: 'Google prefers rich, detailed content',
+            impact: '↑ Search ranking',
+            time: '⏱ 2-3 hours'
         });
     }
 
     // Medium: Schema.org
     if (!seoDetails.hasStructuredData) {
         recommendations.push({
-            title: '⚙️ הוסיפו Schema.org Product Markup',
-            action: 'הוסיפו JSON-LD schema עם שם הפונט, תיאור, מחיר, rating - גוגל יראה כוכבים בתוצאות',
-            why: 'Rich snippets מושכים פי 2 יותר clicks',
-            impact: '↑ הופעה בולטת בגוגל',
-            time: '⏱ 20 דקות'
+            title: '⚙️ Add Schema.org Product Markup',
+            action: 'Add JSON-LD schema with font name, description, price, rating - Google will show stars in results',
+            why: 'Rich snippets attract 2x more clicks',
+            impact: '↑ Stand out in Google',
+            time: '⏱ 20 minutes'
         });
     }
 
     // Growth: Case study
     recommendations.push({
-        title: '🎯 צרו Case Study של פרויקט',
-        action: `בחרו פרויקט שהשתמש ב-${fontName}, תעדו: 1) הבריף 2) למה בחרו בפונט 3) התוצאה 4) תמונות לפני-אחרי`,
-        why: 'Case studies מוכיחים ערך אמיתי',
-        impact: '↑ מושך לקוחות',
-        time: '⏱ 4-5 שעות'
+        title: '🎯 Create Project Case Study',
+        action: `Choose a project using ${fontName}, document: 1) The brief 2) Why chosen 3) The result 4) Before-after images`,
+        why: 'Case studies prove real value',
+        impact: '↑ Attracts clients',
+        time: '⏱ 4-5 hours'
     });
 
     // Growth: Video
     recommendations.push({
-        title: '🎬 עשו וידאו 30 שניות',
-        action: 'הראו את הפונט בתנועה - אנימציה של אותיות, או מצגת מהירה של דוגמאות',
-        why: 'וידאו = פי 3 engagement',
-        impact: '↑ שיתופים ברשתות',
-        time: '⏱ יום עבודה'
+        title: '🎬 Make 30-Second Video',
+        action: 'Show font in motion - letter animation, or quick slideshow of examples',
+        why: 'Video = 3x engagement',
+        impact: '↑ Social shares',
+        time: '⏱ One day'
     });
 
     // Sort by priority and take top 5
@@ -1238,7 +1238,7 @@ function identifyPlatform(hostname) {
         }
     }
 
-    return { name: 'אתר עצמאי', boost: 0 };
+    return { name: 'Independent Site', boost: 0 };
 }
 
 function extractWeights(text) {
