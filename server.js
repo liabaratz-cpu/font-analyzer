@@ -237,20 +237,28 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const url = (result.link || '').toLowerCase();
                             const fontNameLower = fontName.toLowerCase();
 
-                            // Filter out false positives - pets, animals, adoption
-                            const animalKeywords = [
+                            // Filter out false positives - pets, animals, adoption, sales, etc.
+                            const irrelevantKeywords = [
+                                // Animals & pets
                                 'כלב', 'כלבה', 'גור', 'גורה', 'חתול', 'חתולה', 'כלבלב',
                                 'dog', 'puppy', 'cat', 'kitten', 'pet', 'adoption', 'adopt',
                                 'אימוץ', 'מחפש בית', 'למסירה', 'looking for a home',
                                 'בעל חיים', 'animal', 'זנב', 'tail', 'paws', 'כפות',
-                                'מאמץ', 'דוגמן', 'model', 'חברותית', 'friendly'
+                                'מאמץ', 'דוגמן', 'model', 'חברותית', 'friendly',
+                                // Sales & products (phones, devices, etc.)
+                                'jual', 'beli', 'promo', 'limited stock', 'redmi', 'xiaomi',
+                                'samsung', 'iphone', 'phone', 'battery', 'camera', 'gadget',
+                                'למכירה', 'מכירה', 'sale', 'for sale', 'buy', 'sell',
+                                'price', 'מחיר', 'discount', 'הנחה', 'deal', 'offer',
+                                // Other unrelated
+                                'restaurant', 'food', 'recipe', 'travel', 'hotel'
                             ];
 
-                            const hasAnimalKeyword = animalKeywords.some(keyword =>
+                            const hasIrrelevantKeyword = irrelevantKeywords.some(keyword =>
                                 combinedText.includes(keyword)
                             );
 
-                            if (hasAnimalKeyword) return; // Skip animal-related posts
+                            if (hasIrrelevantKeyword) return; // Skip irrelevant posts
 
                             // Basic filtering that works:
                             // 1. Font name must appear IN CONTEXT with font keyword
@@ -258,6 +266,22 @@ async function searchSocialMediaMentions(fontName, fontUrl) {
                             const hasFontKeyword = /(פונט|font|גופן|typeface|typography)/i.test(combinedText);
 
                             if (!hasFontName || !hasFontKeyword) return;
+
+                            // 1.5. Must have design/typography context keywords
+                            const designContextKeywords = [
+                                'עיצוב', 'design', 'graphic', 'טיפוגרפיה', 'typography',
+                                'type', 'lettering', 'אותיות', 'text', 'טקסט',
+                                'logo', 'לוגו', 'branding', 'מיתוג', 'weight', 'משקל',
+                                'bold', 'italic', 'regular', 'light', 'thin',
+                                'opentype', 'ttf', 'otf', 'woff', 'web font', 'google fonts',
+                                'adobe fonts', 'typeface', 'character', 'glyph', 'letter'
+                            ];
+
+                            const hasDesignContext = designContextKeywords.some(keyword =>
+                                combinedText.includes(keyword.toLowerCase())
+                            );
+
+                            if (!hasDesignContext) return; // Skip posts without design context
 
                             // 2. Make sure this specific font is mentioned, not another font
                             // Check if "font [fontname]" or "[fontname] font" appears
