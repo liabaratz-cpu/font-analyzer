@@ -1165,8 +1165,8 @@ function analyzeData(data, urlObj) {
     // Extract font name from H1 or Title, prioritizing H1
     let fontName = data.h1 || data.title;
 
-    // Split by common separators and take the first part
-    fontName = fontName.split('|')[0].split('-')[0].split('–')[0].split(':')[0].trim();
+    // Split by common separators and take the first part (but keep hyphens as they're part of font names)
+    fontName = fontName.split('|')[0].split('–')[0].split(':')[0].trim();
 
     // Remove common prefixes like "פונט", "font", "גופן" from the beginning
     fontName = fontName.replace(/^(פונט|font|גופן)\s+/i, '').trim();
