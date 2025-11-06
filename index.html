@@ -449,7 +449,7 @@
                     </button>
                 </div>
                 <p style="font-size: 0.85em; color: #666666; margin-top: 8px;">
-                    💡 Enter a URL for full analysis, or just a font name to search social media mentions
+                    💡 Enter a font page URL for complete exposure analysis
                 </p>
             </div>
 
@@ -1138,7 +1138,15 @@
 
         function hideLoading() {
             document.getElementById('loading').classList.remove('active');
+
+            // Get current computed background position
+            const currentPosition = window.getComputedStyle(document.body).backgroundPosition;
+
+            // Remove animation class
             document.body.classList.remove('loading-animation');
+
+            // Set the background to stay at current position
+            document.body.style.backgroundPosition = currentPosition;
         }
 
         function showResults() {
