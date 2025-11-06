@@ -1391,6 +1391,50 @@ function calculateScores(data) {
     };
 }
 
+// New endpoint for searching font by name only (without URL)
+app.post('/api/search-font', async (req, res) => {
+    try {
+        const { fontName } = req.body;
+
+        if (!fontName) {
+            return res.status(400).json({
+                success: false,
+                error: 'Font name is required'
+            });
+        }
+
+        console.log('🔍 Searching for font:', fontName);
+
+        // Search for social media mentions only
+        const socialMedia = await searchSocialMediaMentions(fontName, '');
+
+        // Search for general Google results
+        const googleRanking = await analyzeGoogleRanking('', fontName);
+
+        // Combine results
+        const result = {
+            fontName: fontName,
+            mentions: googleRanking,
+            socialMedia: socialMedia
+        };
+
+        console.log('✅ Search completed');
+
+        res.json({
+            success: true,
+            data: result
+        });
+
+    } catch (error) {
+        console.error('❌ Search error:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to search font',
+            details: error.message
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
