@@ -722,7 +722,7 @@ function generateSummaryAndRecommendations(allData, fontName) {
     if (backlinks < 5) {
         recommendations.push({
             title: '🔗 Get 5 External Links',
-            action: '1) Post on alefalefalef.co.il/forum 2) Write post on reddit.com/r/typography 3) Send to design blogs 4) Add to fontsquirrel.com 5) Share in Facebook groups',
+            action: '1) Submit to fontsquirrel.com 2) Post on reddit.com/r/typography 3) Add to Behance.net 4) List on dafont.com 5) Submit to typewolf.com 6) Share on fontsinuse.com',
             why: 'External links = credibility for Google',
             impact: '↑ Each link = +15 ranking points',
             time: '⏱ One week'
@@ -733,7 +733,7 @@ function generateSummaryAndRecommendations(allData, fontName) {
     if (allData.socialMedia?.instagram < 5) {
         recommendations.push({
             title: '📸 Create 10 Instagram Posts',
-            action: `Post examples of ${fontName} in use: logos, posters, books, packaging. Tag: #${fontName.replace(/\s+/g, '')}Font #hebrewtype #typography #fontdesign`,
+            action: `Post examples of ${fontName} in use: logos, posters, books, packaging. Tag: #${fontName.replace(/\s+/g, '')}Font #typography #fontdesign #typeface #lettering #customtype`,
             why: 'Instagram = the main platform for designers',
             impact: '↑ Exposure to target audience',
             time: '⏱ Two weeks'
