@@ -767,9 +767,9 @@
 
                 <!-- Font Visual Description -->
                 ${data.fontDescription && data.fontDescription.enabled ? `
-                <div class="info-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
-                    <div style="font-size: 1.5em; margin-bottom: 15px;">✨ תיאור הפונט</div>
-                    <p style="font-size: 1.1em; line-height: 1.8; margin: 0; opacity: 0.95;">
+                <div class="info-section">
+                    <div class="info-title">✨ תיאור הפונט</div>
+                    <p style="font-size: 1.05em; line-height: 1.7; margin: 0; color: #333;">
                         ${data.fontDescription.description}
                     </p>
                 </div>
@@ -902,22 +902,22 @@
 
                 <!-- AI Intelligence Analysis -->
                 ${data.aiSummary && data.aiSummary.enabled ? `
-                <div class="info-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <div class="info-title" style="color: white;">🤖 AI Smart Analysis</div>
-                    <div style="font-size: 0.95em; line-height: 1.8;">
-                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <strong style="display: block; margin-bottom: 8px;">📝 Summary:</strong>
-                            <p style="margin: 0; line-height: 1.6;">${data.aiSummary.summary}</p>
+                <div class="info-section">
+                    <div class="info-title">🤖 AI Smart Analysis</div>
+                    <div style="font-size: 0.95em; line-height: 1.7; color: #333;">
+                        <div style="background: rgba(33, 150, 243, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 3px solid #2196F3;">
+                            <strong style="display: block; margin-bottom: 8px; color: #2196F3;">📝 Summary:</strong>
+                            <p style="margin: 0; line-height: 1.6; color: #333;">${data.aiSummary.summary}</p>
                         </div>
 
                         ${data.aiSummary.recommendations && data.aiSummary.recommendations.length > 0 ? `
-                        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                            <strong style="display: block; margin-bottom: 15px; font-size: 1.1em;">💡 המלצות לפעולה:</strong>
+                        <div>
+                            <strong style="display: block; margin-bottom: 15px; font-size: 1.05em; color: #000;">💡 המלצות לפעולה:</strong>
                             ${data.aiSummary.recommendations.map((rec, i) => `
-                                <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-right: 4px solid ${rec.title.includes('CRITICAL') ? '#ff4444' : rec.title.includes('🔗') ? '#ffa500' : '#4CAF50'};">
-                                    <div style="font-weight: 700; margin-bottom: 8px; font-size: 1em;">${typeof rec === 'string' ? rec : rec.title}</div>
+                                <div style="background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid #2196F3; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                    <div style="font-weight: 700; margin-bottom: 8px; font-size: 0.95em; color: #000;">${typeof rec === 'string' ? rec : rec.title}</div>
                                     ${typeof rec === 'object' ? `
-                                        <div style="font-size: 0.9em; line-height: 1.6; opacity: 0.95;">
+                                        <div style="font-size: 0.85em; line-height: 1.6; color: #555;">
                                             <div style="margin-bottom: 6px;"><strong>✓ פעולה:</strong> ${rec.action}</div>
                                             <div style="margin-bottom: 6px;"><strong>❓ למה:</strong> ${rec.why}</div>
                                             <div style="margin-bottom: 6px;"><strong>📈 השפעה:</strong> ${rec.impact}</div>
@@ -934,33 +934,33 @@
 
                 <!-- Content Quality Analysis -->
                 ${data.contentAnalysis && data.contentAnalysis.enabled ? `
-                <div class="info-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
-                    <div class="info-title" style="color: white;">📄 Content Quality Analysis</div>
-                    <div style="font-size: 0.95em; line-height: 1.6;">
+                <div class="info-section">
+                    <div class="info-title">📄 Content Quality Analysis</div>
+                    <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold;">${data.contentAnalysis.contentScore}/10</div>
-                                <div style="opacity: 0.9; margin-top: 5px;">Content Quality</div>
+                            <div style="background: rgba(33, 150, 243, 0.08); padding: 16px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 2em; font-weight: bold; color: #2196F3;">${data.contentAnalysis.contentScore}/10</div>
+                                <div style="color: #666; margin-top: 5px; font-weight: 500;">Content Quality</div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold;">${data.contentAnalysis.marketingScore}/10</div>
-                                <div style="opacity: 0.9; margin-top: 5px;">Marketing</div>
+                            <div style="background: rgba(33, 150, 243, 0.08); padding: 16px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 2em; font-weight: bold; color: #2196F3;">${data.contentAnalysis.marketingScore}/10</div>
+                                <div style="color: #666; margin-top: 5px; font-weight: 500;">Marketing</div>
                             </div>
                         </div>
 
                         ${data.contentAnalysis.strengths && data.contentAnalysis.strengths.length > 0 ? `
-                        <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                            <strong>✅ Strengths:</strong>
-                            <ul style="margin: 8px 0 0; padding-right: 20px;">
+                        <div style="background: rgba(76, 175, 80, 0.08); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid #4CAF50;">
+                            <strong style="color: #4CAF50;">✅ Strengths:</strong>
+                            <ul style="margin: 8px 0 0; padding-right: 20px; color: #333;">
                                 ${data.contentAnalysis.strengths.map(s => `<li>${s}</li>`).join('')}
                             </ul>
                         </div>
                         ` : ''}
 
                         ${data.contentAnalysis.improvements && data.contentAnalysis.improvements.length > 0 ? `
-                        <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px;">
-                            <strong>🔧 Improvements:</strong>
-                            <ul style="margin: 8px 0 0; padding-right: 20px;">
+                        <div style="background: rgba(255, 152, 0, 0.08); padding: 12px; border-radius: 12px; border-left: 3px solid #FF9800;">
+                            <strong style="color: #FF9800;">🔧 Improvements:</strong>
+                            <ul style="margin: 8px 0 0; padding-right: 20px; color: #333;">
                                 ${data.contentAnalysis.improvements.map(i => `<li>${i}</li>`).join('')}
                             </ul>
                         </div>
@@ -969,58 +969,27 @@
                 </div>
                 ` : ''}
 
-                <!-- Sentiment Analysis -->
-                ${data.sentimentAnalysis && data.sentimentAnalysis.enabled ? `
-                <div class="info-section" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                    <div class="info-title">😊 Mentions Sentiment</div>
-                    <div style="font-size: 0.95em; line-height: 1.6;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                            <div style="background: rgba(76, 175, 80, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #4CAF50;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #2e7d32;">${data.sentimentAnalysis.positive}</div>
-                                <div style="color: #2e7d32; margin-top: 5px;">Positive</div>
-                            </div>
-                            <div style="background: rgba(158, 158, 158, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #9E9E9E;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #616161;">${data.sentimentAnalysis.neutral}</div>
-                                <div style="color: #616161; margin-top: 5px;">Neutral</div>
-                            </div>
-                            <div style="background: rgba(244, 67, 54, 0.2); padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #F44336;">
-                                <div style="font-size: 1.8em; font-weight: bold; color: #c62828;">${data.sentimentAnalysis.negative}</div>
-                                <div style="color: #c62828; margin-top: 5px;">Negative</div>
-                            </div>
-                        </div>
-
-                        ${data.sentimentAnalysis.highlights && data.sentimentAnalysis.highlights.length > 0 ? `
-                        <div style="background: white; padding: 12px; border-radius: 8px;">
-                            <strong style="color: #333;">🌟 Highlights:</strong>
-                            <ul style="margin: 8px 0 0; padding-right: 20px; color: #555;">
-                                ${data.sentimentAnalysis.highlights.map(h => `<li style="margin-bottom: 5px;">${h}</li>`).join('')}
-                            </ul>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-                ` : ''}
 
                 <!-- Score Breakdown -->
-                <div class="info-section" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="info-section">
                     <div class="info-title">📊 Score Breakdown</div>
                     <div style="font-size: 0.95em; line-height: 1.6; color: #333;">
-                        <p style="margin-bottom: 15px;"><strong>Your exposure score is based on:</strong></p>
+                        <p style="margin-bottom: 15px; font-weight: 500;"><strong>Your exposure score is based on:</strong></p>
                         <div class="info-row">
                             <span class="info-key">SEO Score (25%):</span>
-                            <span class="info-value">${data.scores.seoScore || 0}/100</span>
+                            <span class="info-value" style="color: #2196F3; font-weight: 700;">${data.scores.seoScore || 0}/100</span>
                         </div>
                         <div class="info-row">
                             <span class="info-key">Google Ranking (30%):</span>
-                            <span class="info-value">${data.scores.rankingScore || 0}/100</span>
+                            <span class="info-value" style="color: #2196F3; font-weight: 700;">${data.scores.rankingScore || 0}/100</span>
                         </div>
                         <div class="info-row">
                             <span class="info-key">Total Mentions (20%):</span>
-                            <span class="info-value">${data.scores.mentionsScore || 0}/100</span>
+                            <span class="info-value" style="color: #2196F3; font-weight: 700;">${data.scores.mentionsScore || 0}/100</span>
                         </div>
                         <div class="info-row">
                             <span class="info-key">Social Media (25%):</span>
-                            <span class="info-value">${data.scores.socialScore || 0}/100</span>
+                            <span class="info-value" style="color: #2196F3; font-weight: 700;">${data.scores.socialScore || 0}/100</span>
                         </div>
                     </div>
                 </div>
